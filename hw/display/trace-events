@@ -226,3 +226,6 @@ apple_gfx_iosfc_unmap_memory(void *a, void *b, void *c, void *d, void *e, void *
 apple_gfx_iosfc_unmap_memory_region(void* mem, void *region) "unmapping @ %p from memory region %p"
 apple_gfx_iosfc_raise_irq(uint32_t vector) "vector=0x%x"
 
+# st7789v.c
+st7789v_read(void *dev, unsigned int addr, unsigned int size, uint64_t value) "st7789v: %p reg: 0x%02x size: %d value: 0x%"PRIx64
+st7789v_write(void *dev, unsigned int addr, unsigned int size, uint64_t value) "st7789v: %p reg: 0x%02x size: %d value: 0x%"PRIx64

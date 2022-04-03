@@ -45,6 +45,8 @@ if (config_all_devices.has_key('CONFIG_VGA_CIRRUS') or
                                       if_false: files('acpi-vga-stub.c'))
 endif
 
+system_ss.add(when: 'CONFIG_ST7789V', if_true: files('st7789v.c'))
+
 if config_all_devices.has_key('CONFIG_QXL')
   qxl_ss = ss.source_set()
   qxl_ss.add(when: 'CONFIG_QXL', if_true: [files('qxl.c', 'qxl-logger.c', 'qxl-render.c'),
