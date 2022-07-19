@@ -411,6 +411,7 @@ config GD32F470XX_SOC
     select ARM_V7M
     select OR_IRQ
     select STM32_RCC
+    select STM32F2XX_CRC
     select STM32F2XX_PWR
     select STM32F4XX_SYSCFG
     select STM32F4XX_EXTI
