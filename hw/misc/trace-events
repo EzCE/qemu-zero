@@ -381,6 +381,14 @@ stm32f2xx_pwr_write(void *dev, unsigned int addr, unsigned int size, uint64_t va
 stm32f2xx_crc_read(void *dev, unsigned int addr, unsigned int size, uint64_t value) "crc: %p reg: 0x%02x size: %d value: 0x%"PRIx64
 stm32f2xx_crc_write(void *dev, unsigned int addr, unsigned int size, uint64_t value) "crc: %p reg: 0x%02x size: %d value: 0x%"PRIx64
 
+# stm32f2xx_rng.c
+stm32f2xx_rng_read(void *dev, unsigned int addr, unsigned int size, uint64_t value) "rng: %p reg: 0x%02x size: %d value: 0x%"PRIx64
+stm32f2xx_rng_write(void *dev, unsigned int addr, unsigned int size, uint64_t value) "rng: %p reg: 0x%02x size: %d value: 0x%"PRIx64
+
+# stm32f2xx_usb_otg_fs.c
+stm32f2xx_usb_otg_fs_read(void *dev, unsigned int addr, unsigned int size, uint64_t value) "usb_otg_fs: %p reg: 0x%02x size: %d value: 0x%"PRIx64
+stm32f2xx_usb_otg_fs_write(void *dev, unsigned int addr, unsigned int size, uint64_t value) "usb_otg_fs: %p reg: 0x%02x size: %d value: 0x%"PRIx64
+
 # lasi.c
 lasi_chip_mem_valid(uint64_t addr, uint32_t val) "access to addr 0x%"PRIx64" is %d"
 lasi_chip_read(uint64_t addr, uint32_t val) "addr 0x%"PRIx64" val 0x%08x"

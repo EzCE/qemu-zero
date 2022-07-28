@@ -25,8 +25,17 @@
 #ifndef HW_ARM_STM32F405_SOC_H
 #define HW_ARM_STM32F405_SOC_H
 
+<<<<<<< HEAD:include/hw/arm/stm32f405_soc.h
 #include "hw/misc/stm32_rcc.h"
 #include "hw/misc/stm32f4xx_syscfg.h"
+=======
+#include "hw/gpio/stm32f2xx_gpio.h"
+#include "hw/misc/stm32f2xx_rcc.h"
+#include "hw/misc/stm32f2xx_crc.h"
+#include "hw/misc/stm32f2xx_rng.h"
+#include "hw/misc/stm32f2xx_syscfg.h"
+#include "hw/misc/stm32f2xx_usb_otg_fs.h"
+>>>>>>> 68fc6bae69 (Implement RNG in stm32f2xx):include/hw/arm/stm32f4xx_soc.h
 #include "hw/timer/stm32f2xx_timer.h"
 #include "hw/char/stm32f2xx_usart.h"
 #include "hw/adc/stm32f2xx_adc.h"
