@@ -98,6 +98,9 @@ config IMX
 config FSL_IMX8MP_ANALOG
     bool
 
+config STM32F2XX_PWR
+    bool
+
 config FSL_IMX8MP_CCM
     bool
 
