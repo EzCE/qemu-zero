@@ -117,7 +117,7 @@ static void zgc4_init(MachineState *machine)
 
     soc = qdev_new(TYPE_GD32F470XX_SOC);
     qdev_prop_set_string(soc, "soc-type", VARIANT_GD32F470Z_SOC);
-    qdev_prop_set_uint32(DEVICE(&GD32F470XX_SOC(soc)->adc[0]), "value", 0xFFF);
+    // qdev_prop_set_uint32(DEVICE(&GD32F470XX_SOC(soc)->adc[0]), "value", 0xFFF);
     qdev_connect_clock_in(soc, "sysclk", sysclk);
     sysbus_realize(SYS_BUS_DEVICE(soc), &error_fatal);
 

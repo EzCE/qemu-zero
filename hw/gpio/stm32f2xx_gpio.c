@@ -16,8 +16,8 @@
 #include "qemu/osdep.h"
 
 #include "hw/gpio/stm32f2xx_gpio.h"
-#include "hw/irq.h"
-#include "hw/qdev-properties.h"
+#include "hw/core/irq.h"
+#include "hw/core/qdev-properties.h"
 #include "qapi/error.h"
 #include "qemu/log.h"
 #include "qemu/module.h"
@@ -176,7 +176,7 @@ static void stm32f2xx_gpio_enter_reset(Object *obj, ResetType type)
     s->afrh = 0x00000000;
 }
 
-static void stm32f2xx_gpio_hold_reset(Object *obj)
+static void stm32f2xx_gpio_hold_reset(Object *obj, ResetType type)
 {
     STM32F2xxGpioState *s = STM32F2XX_GPIO(obj);
 
@@ -196,13 +196,13 @@ static void stm32f2xx_gpio_init(Object *obj)
     qdev_init_gpio_out(dev, s->output, STM32F2XX_GPIO_NR_PINS);
 }
 
-static Property stm32f2xx_gpio_properties[] = {
+static const Property stm32f2xx_gpio_properties[] = {
     DEFINE_PROP_UINT32("reset-mode", STM32F2xxGpioState, reset_mode, 0),
     DEFINE_PROP_UINT32("reset-ospeed", STM32F2xxGpioState, reset_ospeed, 0),
     DEFINE_PROP_UINT32("reset-pupd", STM32F2xxGpioState, reset_pupd, 0),
 };
 
-static void stm32f2xx_gpio_class_init(ObjectClass *klass, void *data)
+static void stm32f2xx_gpio_class_init(ObjectClass *klass, const void *data)
 {
     ResettableClass *reset = RESETTABLE_CLASS(klass);
     DeviceClass *dc = DEVICE_CLASS(klass);

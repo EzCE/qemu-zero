@@ -26,7 +26,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "system/address-spaces.h"
-// #include "sysemu/sysemu.h"
+#include "system/system.h"
 #include "hw/arm/gd32f470xx_soc.h"
 #include "hw/core/qdev-clock.h"
 #include "hw/misc/unimp.h"
@@ -96,7 +96,7 @@ static void gd32f470xx_soc_initfn(Object *obj)
 
     object_initialize_child(obj, "rng", &s->rng, TYPE_STM32F2XX_RNG);
 
-    object_initialize_child(obj, "syscfg", &s->syscfg, TYPE_STM32F2XX_SYSCFG);
+    object_initialize_child(obj, "syscfg", &s->syscfg, TYPE_STM32F4XX_SYSCFG);
 
     for (i = 0; i < GD32F470XX_NUM_GPIOS; i++) {
         object_initialize_child(obj, "gpio[*]", &s->gpio[i],
