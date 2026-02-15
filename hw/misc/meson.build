@@ -110,6 +110,7 @@ system_ss.add(when: 'CONFIG_XLNX_VERSAL_TRNG', if_true: files(
   'xlnx-versal-trng.c',
 ))
 system_ss.add(when: 'CONFIG_STM32_RCC', if_true: files('stm32_rcc.c'))
+system_ss.add(when: 'CONFIG_STM32F2XX_RCC', if_true: files('stm32f2xx_rcc.c'))
 system_ss.add(when: 'CONFIG_STM32F2XX_PWR', if_true: files('stm32f2xx_pwr.c'))
 system_ss.add(when: 'CONFIG_STM32F2XX_CRC', if_true: files('stm32f2xx_crc.c'))
 system_ss.add(when: 'CONFIG_STM32F2XX_RNG', if_true: files('stm32f2xx_rng.c'))
