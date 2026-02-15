@@ -25,6 +25,8 @@
 #include "qemu/log.h"
 #include "qemu/module.h"
 #include "qom/object.h"
+#include "qobject/qlist.h"
+#include "qobject/qstring.h"
 #include "trace.h"
 
 void gpio_keypad_set_keys(DeviceState *dev, const GpioKeypadKey *keys)
@@ -34,13 +36,13 @@ void gpio_keypad_set_keys(DeviceState *dev, const GpioKeypadKey *keys)
     unsigned count = 0;
     unsigned i;
     int rc;
+    QList *keys_list;
 
     for (i = 0; keys[i].qcode != Q_KEY_CODE_UNMAPPED; i++) {
         count++;
     }
 
-    qdev_prop_set_uint32(dev, "len-keys", count);
-
+    keys_list = qlist_new();
     for (i = 0; i < count; i++) {
         const GpioKeypadKey *key = &keys[i];
 
@@ -50,8 +52,9 @@ void gpio_keypad_set_keys(DeviceState *dev, const GpioKeypadKey *keys)
         rc = snprintf(key_index, sizeof(key_index), "keys[%u]", i);
         assert(rc < sizeof(key_index));
 
-        qdev_prop_set_string(dev, key_index, key_definition);
+        qlist_append(keys_list, qstring_from_str(key_definition));
     }
+    qdev_prop_set_array(dev, "keys", keys_list);
 }
 
 static void gpio_keypad_set_output(GpioKeypadState *s)
