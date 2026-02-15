@@ -31,7 +31,7 @@
 
 #define CRC_POLYMONIAL 0x04C11DB7
 
-#include "hw/sysbus.h"
+#include "hw/core/sysbus.h"
 #include "qom/object.h"
 
 #define TYPE_STM32F2XX_CRC "stm32f2xx-crc"
