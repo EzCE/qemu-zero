@@ -383,7 +383,6 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
 
 static Property gd32f470xx_soc_properties[] = {
     DEFINE_PROP_STRING("soc-type", GD32F470XXState, soc_type),
-    DEFINE_PROP_END_OF_LIST(),
 };
 
 static void gd32f470xx_soc_class_init(ObjectClass *klass, void *data)

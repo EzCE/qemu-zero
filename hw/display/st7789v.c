@@ -27,7 +27,7 @@
 #include "ui/pixel_ops.h"
 #include "hw/display/framebuffer.h"
 #include "hw/display/st7789v.h"
-#include "hw/qdev-properties.h"
+#include "hw/core/qdev-properties.h"
 #include "qemu/log.h"
 #include "qemu/module.h"
 #include "qapi/error.h"
@@ -536,12 +536,11 @@ static const MemoryRegionOps st7789v_mmio_ops = {
     .endianness = DEVICE_NATIVE_ENDIAN,
 };
 
-static Property st7789v_properties[] = {
+static const Property st7789v_properties[] = {
     DEFINE_PROP_UINT32("display-id", ST7789VState, display_id, 0x858552),
     DEFINE_PROP_UINT32("width", ST7789VState, width, 240),
     DEFINE_PROP_UINT32("height", ST7789VState, height, 320),
     DEFINE_PROP_BOOL("rotate-right", ST7789VState, rotate_right, false),
-    DEFINE_PROP_END_OF_LIST(),
 };
 
 static void st7789v_init(Object *obj)
@@ -581,14 +580,14 @@ static void st7789v_init(Object *obj)
     sysbus_init_mmio(SYS_BUS_DEVICE(obj), &s->mmio);
 }
 
-static void st7789v_class_init(ObjectClass *oc, void *data)
+static void st7789v_class_init(ObjectClass *oc, const void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(oc);
 
     device_class_set_props(dc, st7789v_properties);
     set_bit(DEVICE_CATEGORY_DISPLAY, dc->categories);
     dc->realize = st7789v_realize;
-    dc->reset = st7789v_reset;
+    device_class_set_legacy_reset(dc, st7789v_reset);
 
     /* Note: This device does not any state that we have to reset or migrate */
 }

@@ -16,8 +16,8 @@
 #ifndef STM32F2XX_GPIO_H
 #define STM32F2XX_GPIO_H
 
-#include "exec/memory.h"
-#include "hw/sysbus.h"
+#include "system/memory.h"
+#include "hw/core/sysbus.h"
 
 /* Number of pins managed by each controller. */
 #define STM32F2XX_GPIO_NR_PINS (16)

@@ -15,9 +15,9 @@
 
 #include "qemu/osdep.h"
 #include "qemu/cutils.h"
-#include "hw/irq.h"
-#include "hw/qdev-properties.h"
-#include "hw/sysbus.h"
+#include "hw/core/irq.h"
+#include "hw/core/qdev-properties.h"
+#include "hw/core/sysbus.h"
 #include "hw/input/gpio-keypad.h"
 #include "ui/input.h"
 #include "qapi/error.h"
@@ -240,19 +240,18 @@ out:
 }
 
 const PropertyInfo gpio_keypad_key_property_info = {
-    .name  = "gpio_keypad_key",
+    .type  = "gpio_keypad_key",
     .description = "Keypad key, example: 3;2:136",
     .get   = get_keypad_key,
     .set   = set_keypad_key,
 };
 
-static Property gpio_keypad_properties[] = {
+static const Property gpio_keypad_properties[] = {
     DEFINE_PROP_BOOL("active-low", GpioKeypadState, active_low, 0),
     DEFINE_PROP_UINT32("num-rows", GpioKeypadState, num_rows, 0),
     DEFINE_PROP_UINT32("num-columns", GpioKeypadState, num_columns, 0),
     DEFINE_PROP_ARRAY("keys", GpioKeypadState, num_keys, keys,
                       gpio_keypad_key_property_info, GpioKeypadKey),
-    DEFINE_PROP_END_OF_LIST(),
 };
 
 static void gpio_keypad_initfn(Object *obj)
@@ -263,7 +262,7 @@ static void gpio_keypad_initfn(Object *obj)
     qdev_init_gpio_out(DEVICE(obj), s->output, GPIO_KEYPAD_NR_PINS);
 }
 
-static void gpio_keypad_class_init(ObjectClass *oc, void *data)
+static void gpio_keypad_class_init(ObjectClass *oc, const void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(oc);
 

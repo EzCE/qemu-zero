@@ -201,7 +201,6 @@ static Property stm32f2xx_gpio_properties[] = {
     DEFINE_PROP_UINT32("reset-mode", STM32F2xxGpioState, reset_mode, 0),
     DEFINE_PROP_UINT32("reset-ospeed", STM32F2xxGpioState, reset_ospeed, 0),
     DEFINE_PROP_UINT32("reset-pupd", STM32F2xxGpioState, reset_pupd, 0),
-    DEFINE_PROP_END_OF_LIST(),
 };
 
 static void stm32f2xx_gpio_class_init(ObjectClass *klass, void *data)

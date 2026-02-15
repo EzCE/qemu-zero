@@ -25,7 +25,7 @@
 #ifndef HW_STM32F4XX_PWR_H
 #define HW_STM32F4XX_PWR_H
 
-#include "hw/sysbus.h"
+#include "hw/core/sysbus.h"
 #include "qom/object.h"
 
 #define PWR_CR1  0x00

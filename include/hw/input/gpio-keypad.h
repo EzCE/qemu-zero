@@ -16,7 +16,7 @@
 #ifndef HW_INPUT_GPIO_KEYPAD_H
 #define HW_INPUT_GPIO_KEYPAD_H
 
-#include "hw/sysbus.h"
+#include "hw/core/sysbus.h"
 
 /* Max number of pins managed by keypad. */
 #define GPIO_KEYPAD_NR_PINS (32)

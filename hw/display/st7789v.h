@@ -25,7 +25,7 @@
 #ifndef HW_ST7789V_RCC_H
 #define HW_ST7789V_RCC_H
 
-#include "hw/sysbus.h"
+#include "hw/core/sysbus.h"
 #include "qom/object.h"
 
 #define TYPE_ST7789V "st7789v"
