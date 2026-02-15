@@ -25,10 +25,10 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "exec/address-spaces.h"
-#include "sysemu/sysemu.h"
+#include "system/address-spaces.h"
+// #include "sysemu/sysemu.h"
 #include "hw/arm/gd32f470xx_soc.h"
-#include "hw/qdev-clock.h"
+#include "hw/core/qdev-clock.h"
 #include "hw/misc/unimp.h"
 
 #define RCC_ADD                        0x40023800
@@ -380,11 +380,11 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
     create_unimplemented_device("DES",         0x1FFF7A10, 0x200); // Device Electronic Signature
 }
 
-static Property gd32f470xx_soc_properties[] = {
+static const Property gd32f470xx_soc_properties[] = {
     DEFINE_PROP_STRING("soc-type", GD32F470XXState, soc_type),
 };
 
-static void gd32f470xx_soc_class_init(ObjectClass *klass, void *data)
+static void gd32f470xx_soc_class_init(ObjectClass *klass, const void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
 

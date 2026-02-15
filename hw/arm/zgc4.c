@@ -34,7 +34,8 @@
 #include "hw/input/gpio-keypad.h"
 #include "hw/display/st7789v.h"
 #include "hw/arm/zgc4.h"
-#include "include/exec/address-spaces.h"
+#include "system/address-spaces.h"
+#include "hw/arm/machines-qom.h"
 
 /* Main SYSCLK frequency in Hz (240MHz) */
 #define SYSCLK_FRQ 240000000ULL
@@ -172,22 +173,23 @@ static void zgc4_init(MachineState *machine)
 
     armv7m_load_kernel(ARM_CPU(first_cpu),
                        machine->kernel_filename,
+                       GD32F470XX_FLASH_BASE_ADDRESS,
                        GD32F470Z_SOC_FLASH_SIZE);
 }
 
-static void zgc4_machine_class_init(ObjectClass *oc, void *data)
+static void zgc4_machine_init(MachineClass *mc)
 {
-    MachineClass *mc = MACHINE_CLASS(oc);
     mc->desc = "ZGC4 calculator (Cortex-M4)";
     mc->init = zgc4_init;
+    mc->default_cpu_type = ARM_CPU_TYPE_NAME("cortex-m4");
 }
 
-static const TypeInfo zgc4_machine_types[] = {
-    {
-        .name           = MACHINE_TYPE_NAME("zgc4"),
-        .parent         = TYPE_MACHINE,
-        .class_init     = zgc4_machine_class_init,
-    },
-};
+// static const TypeInfo zgc4_machine_types[] = {
+//     {
+//         .name           = MACHINE_TYPE_NAME("zgc4"),
+//         .parent         = TYPE_MACHINE,
+//         .class_init     = zgc4_machine_class_init,
+//     },
+// };
 
-DEFINE_TYPES(zgc4_machine_types)
+DEFINE_MACHINE_ARM("zgc4", zgc4_machine_init)

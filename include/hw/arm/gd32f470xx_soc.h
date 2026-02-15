@@ -37,7 +37,7 @@
 #include "hw/char/stm32f2xx_usart.h"
 #include "hw/adc/stm32f2xx_adc.h"
 #include "hw/misc/stm32f4xx_exti.h"
-#include "hw/or-irq.h"
+#include "hw/core/or-irq.h"
 #include "hw/ssi/stm32f2xx_spi.h"
 #include "hw/arm/armv7m.h"
 #include "qemu/units.h"
@@ -69,7 +69,7 @@ struct GD32F470XXState {
     ARMv7MState armv7m;
 
     STM32F2xxGpioState gpio[GD32F470XX_NUM_GPIOS];
-    STM32RccState rcc;
+    STM32F3XXRccState rcc;
     STM32F2XXPwrState pwr;
     STM32F2XXCrcState crc;
     STM32F2XXRngState rng;
@@ -77,7 +77,7 @@ struct GD32F470XXState {
     STM32F4xxExtiState exti;
     STM32F2XXUsartState usart[GD32F470XX_NUM_USARTS];
     STM32F2XXTimerState timer[GD32F470XX_NUM_TIMERS];
-    qemu_or_irq adc_irqs;
+    OrIRQState adc_irqs;
     STM32F2XXADCState adc[GD32F470XX_NUM_ADCS];
     STM32F2XXSPIState spi[GD32F470XX_NUM_SPIS];
     STM32F2XXUsbOtgFsState usb_otg_fs;

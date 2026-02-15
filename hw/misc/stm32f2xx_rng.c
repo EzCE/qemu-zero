@@ -105,11 +105,11 @@ static void stm32f2xx_rng_init(Object *obj)
     sysbus_init_mmio(SYS_BUS_DEVICE(obj), &s->mmio);
 }
 
-static void stm32f2xx_rng_class_init(ObjectClass *klass, void *data)
+static void stm32f2xx_rng_class_init(ObjectClass *klass, const void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
 
-    dc->reset = stm32f2xx_rng_reset;
+    device_class_set_legacy_reset(dc, stm32f2xx_rng_reset);
 }
 
 static const TypeInfo stm32f2xx_rng_info = {

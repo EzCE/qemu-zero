@@ -25,7 +25,7 @@
 #ifndef HW_STM_USB_OTG_FS_H
 #define HW_STM_USB_OTG_FS_H
 
-#include "hw/sysbus.h"
+#include "hw/core/sysbus.h"
 #include "qom/object.h"
 
 #define OTG_FS_GRSTCTL     0x10

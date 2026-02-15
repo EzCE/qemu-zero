@@ -25,7 +25,7 @@
 #ifndef HW_STM32F4XX_RNG_H
 #define HW_STM32F4XX_RNG_H
 
-#include "hw/sysbus.h"
+#include "hw/core/sysbus.h"
 #include "qom/object.h"
 
 #define RNG_CR  0x00
