@@ -34,6 +34,7 @@
 #include "hw/input/gpio-keypad.h"
 #include "hw/display/st7789v.h"
 #include "hw/arm/zgc4.h"
+#include "system/block-backend.h"
 #include "system/address-spaces.h"
 #include "hw/arm/machines-qom.h"
 
@@ -107,8 +108,10 @@ static const GpioKeypadKey keys[] = {
 static void zgc4_init(MachineState *machine)
 {
     DeviceState *soc;
+    DeviceState *flash;
     DeviceState *gpio;
     DeviceState *dev;
+    DriveInfo *dinfo;
     Clock *sysclk;
 
     /* This clock doesn't need migration because it is fixed-frequency */
@@ -117,9 +120,22 @@ static void zgc4_init(MachineState *machine)
 
     soc = qdev_new(TYPE_GD32F470XX_SOC);
     qdev_prop_set_string(soc, "soc-type", VARIANT_GD32F470Z_SOC);
-    // qdev_prop_set_uint32(DEVICE(&GD32F470XX_SOC(soc)->adc[0]), "value", 0xFFF);
     qdev_connect_clock_in(soc, "sysclk", sysclk);
     sysbus_realize(SYS_BUS_DEVICE(soc), &error_fatal);
+
+    dinfo = drive_get(IF_MTD, 0, 0);
+    flash = qdev_new("w25q64");
+    if (dinfo) {
+        qdev_prop_set_drive(flash, "drive",
+                            blk_by_legacy_dinfo(dinfo));
+    }
+    GD32F470XXState *s = GD32F470XX_SOC(soc);
+    qdev_realize(flash, BUS(s->spi[5].ssi), &error_fatal);
+    qemu_irq cs_line = qdev_get_gpio_in_named(flash, SSI_GPIO_CS, 0);
+    qdev_connect_gpio_out(DEVICE(&s->gpio[1]),
+                          5,
+                          cs_line);
+    object_unref(OBJECT(flash));
 
     dev = qdev_new(TYPE_ST7789V);
     qdev_prop_set_bit(dev, "rotate-right", true);
@@ -161,12 +177,10 @@ static void zgc4_init(MachineState *machine)
 
     qdev_connect_gpio_out(DEVICE(gpio), 9,
                           qdev_get_gpio_in_named(soc, "gpio-c", 9));
-
     for (int i = 0; i < 5; i++) {
         qdev_connect_gpio_out_named(DEVICE(soc), "gpio-b-out", i,
                                     qdev_get_gpio_in(gpio, i));
     }
-
     object_unref(OBJECT(gpio));
 
     object_unref(OBJECT(soc));
@@ -183,13 +197,5 @@ static void zgc4_machine_init(MachineClass *mc)
     mc->init = zgc4_init;
     mc->default_cpu_type = ARM_CPU_TYPE_NAME("cortex-m4");
 }
-
-// static const TypeInfo zgc4_machine_types[] = {
-//     {
-//         .name           = MACHINE_TYPE_NAME("zgc4"),
-//         .parent         = TYPE_MACHINE,
-//         .class_init     = zgc4_machine_class_init,
-//     },
-// };
 
 DEFINE_MACHINE_ARM("zgc4", zgc4_machine_init)
