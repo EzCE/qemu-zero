@@ -100,7 +100,7 @@ static void gd32f470xx_soc_initfn(Object *obj)
 
     for (i = 0; i < GD32F470XX_NUM_GPIOS; i++) {
         object_initialize_child(obj, "gpio[*]", &s->gpio[i],
-                                TYPE_STM32F2XX_GPIO);
+                                TYPE_GD32F470XX_GPIO);
     }
 
     for (i = 0; i < GD32F470XX_NUM_USARTS; i++) {

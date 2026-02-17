@@ -1,5 +1,5 @@
 /*
- * STM32F2xx GPIO
+ * GD32F470xx GPIO
  *
  * Copyright 2022 Jean-Baptiste Boric <jblbeurope@gmail.com>
  *
@@ -13,37 +13,37 @@
  * GNU General Public License for more details.
  */
 
-#ifndef STM32F2XX_GPIO_H
-#define STM32F2XX_GPIO_H
+#ifndef GD32F470XX_GPIO_H
+#define GD32F470XX_GPIO_H
 
 #include "system/memory.h"
 #include "hw/core/sysbus.h"
 
 /* Number of pins managed by each controller. */
-#define STM32F2XX_GPIO_NR_PINS (16)
+#define GD32F470XX_GPIO_NR_PINS (16)
 
-typedef struct STM32F2xxGpioState {
+typedef struct GD32F470xxGpioState {
     SysBusDevice parent;
 
-    uint32_t mode;
-    uint16_t otype;
-    uint32_t ospeed;
-    uint32_t pupd;
-    uint16_t idr;
-    uint16_t odr;
-    uint32_t afrl;
-    uint32_t afrh;
+    uint32_t ctl;
+    uint16_t omode;
+    uint32_t ospd;
+    uint32_t pud;
+    uint16_t istat;
+    uint16_t octl;
+    uint32_t afsel0;
+    uint32_t afsel1;
 
-    uint32_t reset_mode;
-    uint32_t reset_ospeed;
-    uint32_t reset_pupd;
+    uint32_t reset_ctl;
+    uint32_t reset_ospd;
+    uint32_t reset_pud;
 
     MemoryRegion mmio;
-    qemu_irq output[STM32F2XX_GPIO_NR_PINS];
-} STM32F2xxGpioState;
+    qemu_irq output[GD32F470XX_GPIO_NR_PINS];
+} GD32F470xxGpioState;
 
-#define TYPE_STM32F2XX_GPIO "stm32f2xx-gpio"
-#define STM32F2XX_GPIO(obj) \
-    OBJECT_CHECK(STM32F2xxGpioState, (obj), TYPE_STM32F2XX_GPIO)
+#define TYPE_GD32F470XX_GPIO "gd32f470xx-gpio"
+#define GD32F470XX_GPIO(obj) \
+    OBJECT_CHECK(GD32F470xxGpioState, (obj), TYPE_GD32F470XX_GPIO)
 
-#endif /* STM32F2XX_H */
+#endif

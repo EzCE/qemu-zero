@@ -414,7 +414,7 @@ config GD32F470XX_SOC
     select STM32F2XX_CRC
     select STM32F2XX_PWR
     select STM32F2XX_RNG
-    select STM32F2XX_GPIO
+    select GD32F470XX_GPIO
     select STM32F4XX_SYSCFG
     select STM32F2XX_USB_OTG_FS
     select STM32F4XX_EXTI
