@@ -32,6 +32,12 @@
 
 #include "trace.h"
 
+#define STM32F2XX_PRINT_USART
+
+#ifdef STM32F2XX_PRINT_USART
+#include <stdio.h>
+#endif
+
 static int stm32f2xx_usart_can_receive(void *opaque)
 {
     STM32F2XXUsartState *s = opaque;
@@ -159,6 +165,12 @@ static void stm32f2xx_usart_write(void *opaque, hwaddr addr,
             /* XXX this blocks entire thread. Rewrite to use
              * qemu_chr_fe_write and background I/O callbacks */
             qemu_chr_fe_write_all(&s->chr, &ch, 1);
+            /* Hacked this in to print USART data for now. Probably should
+               clean up later. To disable printing comment out 
+               #define STM32F2XX_PRINT_USART. */
+#ifdef STM32F2XX_PRINT_USART
+            printf("%c", ch);
+#endif
             /* XXX I/O are currently synchronous, making it impossible for
                software to observe transient states where TXE or TC aren't
                set. Unlike TXE however, which is read-only, software may

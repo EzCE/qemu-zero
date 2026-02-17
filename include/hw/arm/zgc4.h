@@ -28,13 +28,16 @@
 
 #include "qom/object.h"
 
+#define TYPE_ZGC4 "zgc4"
+OBJECT_DECLARE_SIMPLE_TYPE(ZGC4State, ZGC4)
+
 typedef struct ZGC4State {
     /*< private >*/
     SysBusDevice parent_obj;
 
     /*< public >*/
 
-    MemoryRegion external_flash;
+    MemoryRegion exmc_sdram;
 
 } ZGC4State;
 

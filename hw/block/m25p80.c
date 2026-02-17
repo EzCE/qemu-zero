@@ -1003,7 +1003,7 @@ static void decode_fast_read_cmd(Flash *s)
         s->needed_bytes += 1;
         break;
     case MAN_WINBOND:
-        s->needed_bytes += 8;
+        s->needed_bytes += 8 / 8; // Use bits for Winbond: 8 cycles * bytes / 8 bytes
         break;
     case MAN_NUMONYX:
         s->needed_bytes += numonyx_extract_cfg_num_dummies(s);

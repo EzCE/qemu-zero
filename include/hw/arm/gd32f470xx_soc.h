@@ -50,6 +50,9 @@ OBJECT_DECLARE_SIMPLE_TYPE(GD32F470XXState, GD32F470XX_SOC)
 #define GD32F470Z_SOC_FLASH_SIZE (3 * MiB)
 #define GD32F470Z_SOC_RAM_SIZE (768 * KiB)
 
+#define GD32F470XX_TCMSRAM_SIZE (64 * KiB)
+#define GD32F470XX_EXMC_SDRAM_SIZE (8 * MiB)
+
 #define GD32F470XX_NUM_GPIOS 9
 #define GD32F470XX_NUM_USARTS 7
 #define GD32F470XX_NUM_TIMERS 4
@@ -58,6 +61,8 @@ OBJECT_DECLARE_SIMPLE_TYPE(GD32F470XXState, GD32F470XX_SOC)
 
 #define GD32F470XX_FLASH_BASE_ADDRESS 0x08000000
 #define GD32F470XX_SRAM_BASE_ADDRESS 0x20000000
+#define GD32F470XX_TCMSRAM_BASE_ADDRESS 0x10000000
+#define GD32F470XX_EXMC_SDRAM_BASE 0xC0000000
 
 struct GD32F470XXState {
     /*< private >*/
@@ -83,6 +88,8 @@ struct GD32F470XXState {
     STM32F2XXUsbOtgFsState usb_otg_fs;
 
     MemoryRegion sram;
+    MemoryRegion tcmsram;
+    MemoryRegion exmc_sdram;
     MemoryRegion flash;
     MemoryRegion flash_alias;
 

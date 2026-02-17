@@ -1,5 +1,5 @@
 /*
- * STM32F405 SPI
+ * STM32F2xx SPI
  *
  * Copyright (c) 2014 Alistair Francis <alistair@alistair23.me>
  *

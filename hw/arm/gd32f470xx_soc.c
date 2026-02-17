@@ -184,7 +184,8 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
                              "GD32F470XX.flash.alias", &s->flash, 0,
                              soc_variant->flash_size);
 
-    memory_region_add_subregion(system_memory, GD32F470XX_FLASH_BASE_ADDRESS, &s->flash);
+    memory_region_add_subregion(system_memory, GD32F470XX_FLASH_BASE_ADDRESS,
+                                &s->flash);
     memory_region_add_subregion(system_memory, 0, &s->flash_alias);
 
     memory_region_init_ram(&s->sram, NULL, "GD32F470XX.sram",
@@ -193,7 +194,26 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
         error_propagate(errp, err);
         return;
     }
-    memory_region_add_subregion(system_memory, GD32F470XX_SRAM_BASE_ADDRESS, &s->sram);
+    memory_region_add_subregion(system_memory, GD32F470XX_SRAM_BASE_ADDRESS,
+                                &s->sram);
+
+    memory_region_init_ram(&s->tcmsram, NULL, "GD32F470XX.tcmsram",
+                           GD32F470XX_TCMSRAM_SIZE, &err);
+    if (err != NULL) {
+        error_propagate(errp, err);
+        return;
+    }
+    memory_region_add_subregion(system_memory, GD32F470XX_TCMSRAM_BASE_ADDRESS,
+                                &s->tcmsram);
+
+    memory_region_init_ram(&s->exmc_sdram, NULL, "GD32F470XX.exmc_sdram",
+                           GD32F470XX_EXMC_SDRAM_SIZE, &err);
+    if (err != NULL) {
+        error_propagate(errp, err);
+        return;
+    }
+    memory_region_add_subregion(system_memory, GD32F470XX_EXMC_SDRAM_BASE,
+                                &s->exmc_sdram);
 
     armv7m = DEVICE(&s->armv7m);
     qdev_prop_set_uint32(armv7m, "init-nsvtor", GD32F470XX_FLASH_BASE_ADDRESS);
