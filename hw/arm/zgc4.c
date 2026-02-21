@@ -31,8 +31,9 @@
 #include "qemu/error-report.h"
 #include "hw/arm/gd32f470xx_soc.h"
 #include "hw/arm/boot.h"
-#include "hw/input/gpio-keypad.h"
 #include "hw/display/st7789v.h"
+#include "hw/input/gpio-keypad.h"
+#include "hw/i2c/gasgauge_i2c.h"
 #include "hw/arm/zgc4.h"
 #include "system/block-backend.h"
 #include "system/address-spaces.h"
@@ -113,6 +114,7 @@ static void zgc4_init(MachineState *machine)
     DeviceState *dev;
     DriveInfo *dinfo;
     Clock *sysclk;
+    GD32F470XXState *s;
 
     /* This clock doesn't need migration because it is fixed-frequency */
     sysclk = clock_new(OBJECT(machine), "SYSCLK");
@@ -122,6 +124,7 @@ static void zgc4_init(MachineState *machine)
     qdev_prop_set_string(soc, "soc-type", VARIANT_GD32F470Z_SOC);
     qdev_connect_clock_in(soc, "sysclk", sysclk);
     sysbus_realize(SYS_BUS_DEVICE(soc), &error_fatal);
+    s = GD32F470XX_SOC(soc);
 
     dinfo = drive_get(IF_MTD, 0, 0);
     flash = qdev_new("w25q64");
@@ -129,7 +132,6 @@ static void zgc4_init(MachineState *machine)
         qdev_prop_set_drive(flash, "drive",
                             blk_by_legacy_dinfo(dinfo));
     }
-    GD32F470XXState *s = GD32F470XX_SOC(soc);
     qdev_realize(flash, BUS(s->spi[5].ssi), &error_fatal);
     qemu_irq cs_line = qdev_get_gpio_in_named(flash, SSI_GPIO_CS, 0);
     qdev_connect_gpio_out(DEVICE(&s->gpio[1]),
@@ -165,7 +167,7 @@ static void zgc4_init(MachineState *machine)
 
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-b-out", 15,
                                 qdev_get_gpio_in(gpio, 5));
-
+   
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-d-out", 6,
                                 qdev_get_gpio_in(gpio, 6));
 
@@ -182,6 +184,10 @@ static void zgc4_init(MachineState *machine)
                               qdev_get_gpio_in_named(soc, "gpio-b", i));
     }
     object_unref(OBJECT(gpio));
+
+    dev = qdev_new(TYPE_GASGAUGE_I2C);
+    qdev_prop_set_uint8(dev, "address", 0x70);
+    qdev_realize_and_unref(dev, BUS(s->i2c[0].bus), &error_fatal);
 
     object_unref(OBJECT(soc));
 

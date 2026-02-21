@@ -30,83 +30,24 @@
 #include "hw/core/qdev-clock.h"
 #include "trace.h"
 
-enum GD32F470xx_RCU_Reg_Add {
-    RCU_CTL_ADD         = 0x00,         /*!< control register */
-    RCU_PLL_ADD         = 0x04,         /*!< PLL register */
-    RCU_CFG0_ADD        = 0x08,         /*!< clock configuration register 0 */
-    RCU_INT_ADD         = 0x0C,         /*!< clock interrupt register */
-    RCU_AHB1RST_ADD     = 0x10,         /*!< AHB1 reset register */
-    RCU_AHB2RST_ADD     = 0x14,         /*!< AHB2 reset register */
-    RCU_AHB3RST_ADD     = 0x18,         /*!< AHB3 reset register */
-    RCU_APB1RST_ADD     = 0x20,         /*!< APB1 reset register */
-    RCU_APB2RST_ADD     = 0x24,         /*!< APB2 reset register */
-    RCU_AHB1EN_ADD      = 0x30,         /*!< AHB1 enable register */
-    RCU_AHB2EN_ADD      = 0x34,         /*!< AHB2 enable register */
-    RCU_AHB3EN_ADD      = 0x38,         /*!< AHB3 enable register */
-    RCU_APB1EN_ADD      = 0x40,         /*!< APB1 enable register */
-    RCU_APB2EN_ADD      = 0x44,         /*!< APB2 enable register */
-    RCU_AHB1SPEN_ADD    = 0x50,         /*!< AHB1 sleep mode enable register */
-    RCU_AHB2SPEN_ADD    = 0x54,         /*!< AHB2 sleep mode enable register */
-    RCU_AHB3SPEN_ADD    = 0x58,         /*!< AHB3 sleep mode enable register */ 
-    RCU_APB1SPEN_ADD    = 0x60,         /*!< APB1 sleep mode enable register */
-    RCU_APB2SPEN_ADD    = 0x64,         /*!< APB2 sleep mode enable register */
-    RCU_BDCTL_ADD       = 0x70,         /*!< backup domain control register */
-    RCU_RSTSCK_ADD      = 0x74,         /*!< reset source / clock register */
-    RCU_PLLSSCTL_ADD    = 0x80,         /*!< PLL clock spread spectrum control register */
-    RCU_PLLI2S_ADD      = 0x84,         /*!< PLLI2S register */ 
-    RCU_PLLSAI_ADD      = 0x88,         /*!< PLLSAI register */ 
-    RCU_CFG1_ADD        = 0x8C,         /*!< clock configuration register 1 */
-    RCU_ADDCTL_ADD      = 0xC0,         /*!< Additional clock control register */
-    RCU_ADDINT_ADD      = 0xCC,         /*!< Additional clock interrupt register */
-    RCU_ADDAPB1RST_ADD  = 0xE0,         /*!< APB1 additional reset register */
-    RCU_ADDAPB1EN_ADD   = 0xE4,         /*!< APB1 additional enable register */
-    RCU_ADDAPB1SPEN_ADD = 0xE8,         /*!< APB1 additional sleep mode enable register */
-    RCU_VKEY_ADD        = 0x100,        /*!< voltage key register */
-    RCU_DSV_ADD         = 0x134,        /*!< deep-sleep mode voltage register */
-};
-
-enum GD32F470xx_RCU_Reg {
-    RCU_CTL,            /*!< control register */
-    RCU_PLL,            /*!< PLL register */
-    RCU_CFG0,           /*!< clock configuration register 0 */
-    RCU_INT,            /*!< clock interrupt register */
-    RCU_AHB1RST,        /*!< AHB1 reset register */
-    RCU_AHB2RST,        /*!< AHB2 reset register */
-    RCU_AHB3RST,        /*!< AHB3 reset register */
-    RCU_APB1RST,        /*!< APB1 reset register */
-    RCU_APB2RST,        /*!< APB2 reset register */
-    RCU_AHB1EN,         /*!< AHB1 enable register */
-    RCU_AHB2EN,         /*!< AHB2 enable register */
-    RCU_AHB3EN,         /*!< AHB3 enable register */
-    RCU_APB1EN,         /*!< APB1 enable register */
-    RCU_APB2EN,         /*!< APB2 enable register */
-    RCU_AHB1SPEN,       /*!< AHB1 sleep mode enable register */
-    RCU_AHB2SPEN,       /*!< AHB2 sleep mode enable register */
-    RCU_AHB3SPEN,       /*!< AHB3 sleep mode enable register */ 
-    RCU_APB1SPEN,       /*!< APB1 sleep mode enable register */
-    RCU_APB2SPEN,       /*!< APB2 sleep mode enable register */
-    RCU_BDCTL,          /*!< backup domain control register */
-    RCU_RSTSCK,         /*!< reset source / clock register */
-    RCU_PLLSSCTL,       /*!< PLL clock spread spectrum control register */
-    RCU_PLLI2S,         /*!< PLLI2S register */ 
-    RCU_PLLSAI,         /*!< PLLSAI register */ 
-    RCU_CFG1,           /*!< clock configuration register 1 */
-    RCU_ADDCTL,         /*!< Additional clock control register */
-    RCU_ADDINT,         /*!< Additional clock interrupt register */
-    RCU_ADDAPB1RST,     /*!< APB1 additional reset register */
-    RCU_ADDAPB1EN,      /*!< APB1 additional enable register */
-    RCU_ADDAPB1SPEN,    /*!< APB1 additional sleep mode enable register */
-    RCU_VKEY,           /*!< voltage key register */
-    RCU_DSV,            /*!< deep-sleep mode voltage register */
-};
-
 static void gd32f470xx_rcu_reset(DeviceState *dev)
 {
     GD32F470XXRcuState *s = GD32F470XX_RCU(dev);
 
-    // s->rcu_reg[RCU_CTL] = 0x00000083;
-    // s->rcu_reg[RCU_CFG0] = 0x00000000;
+    /* Set initial register values from GD32F4xx user manual */
     memset(s->rcu_reg, 0, sizeof(s->rcu_reg));
+    s->rcu_reg[RCU_CTL] = 0x00000083;
+    s->rcu_reg[RCU_PLL] = 0x24003010;
+    s->rcu_reg[RCU_AHB1EN] = 0x00100000;
+    s->rcu_reg[RCU_AHB1SPEN] = 0x7EEF91FF;
+    s->rcu_reg[RCU_AHB2SPEN] = 0x000000C1;
+    s->rcu_reg[RCU_AHB3SPEN] = 0x00000001;
+    s->rcu_reg[RCU_APB1SPEN] = 0xF6FEC9FF;
+    s->rcu_reg[RCU_APB2SPEN] = 0x04777F33;
+    s->rcu_reg[RCU_RSTSCK] = 0x0E000000;
+    s->rcu_reg[RCU_PLLI2S] = 0x24003000;
+    s->rcu_reg[RCU_PLLSAI] = 0x24003000;
+    s->rcu_reg[RCU_ADDAPB1SPEN] = 0x88000000;
 }
 
 static uint64_t gd32f470xx_rcu_read(void *opaque, hwaddr addr,
@@ -255,11 +196,18 @@ static void gd32f470xx_rcu_write(void *opaque, hwaddr addr,
         }
         clock_propagate(s->refclk->source->source);
         break;
+    case RCU_BDCTL_ADD:
+        s->rcu_reg[RCU_BDCTL] = value;
+
+        if (GD_RCU_FIELD(value, RCU_BDCTL_LXTALEN)) {
+            s->rcu_reg[RCU_BDCTL] |= RCU_BDCTL_LXTALSTB;
+        }
+        break;
     case RCU_ADDCTL_ADD:
         s->rcu_reg[RCU_ADDCTL] = value;
 
-        if (value & (1 << 16)) { // IRC48MEN
-            s->rcu_reg[RCU_ADDCTL] |= (1 << 17); // IRC48MSTB
+        if (GD_RCU_FIELD(value, RCU_ADDCTL_IRC48MEN)) {
+            s->rcu_reg[RCU_ADDCTL] |= RCU_ADDCTL_IRC48MSTB;
         }
         break;
     default:

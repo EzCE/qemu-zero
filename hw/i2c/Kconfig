@@ -49,3 +49,11 @@ config PMBUS
 config BCM2835_I2C
     bool
     select I2C
+
+config GD32F470XX_I2C
+    bool
+    select I2C
+
+config GASGAUGE_I2C
+    bool
+    select I2C

@@ -54,20 +54,25 @@ static const uint32_t gpio_addr[] = { 0x40020000, 0x40020400, 0x40020800,
 static const uint32_t usart_addr[] = { 0x40011000, 0x40004400, 0x40004800,
                                        0x40004C00, 0x40005000, 0x40011400,
                                        0x40007800, 0x40007C00 };
-/* At the moment only Timer 2 to 5 are modelled */
-static const uint32_t timer_addr[] = { 0x40000000, 0x40000400,
-                                       0x40000800, 0x40000C00 };
+static const uint32_t timer_addr[] = { 0x40010000, 0x40000000, 0x40000400,
+                                       0x40000800, 0x40000C00, 0x40001000,
+                                       0x40001400, 0x40010400, 0x40014000,
+                                       0x40014400, 0x40014800, 0x40001800,
+                                       0x40001C00, 0x40002000 };
 static const uint32_t adc_addr[] = { 0x40012000, 0x40012100, 0x40012200,
                                      0x40012300, 0x40012400, 0x40012500 };
 static const uint32_t spi_addr[] =   { 0x40013000, 0x40003800, 0x40003C00,
                                        0x40013400, 0x40015000, 0x40015400 };
+static const uint32_t i2c_addr[] =   { 0x40005400, 0x40005800, 0x40005C00 };
 #define EXTI_ADDR                      0x40013C00
 
 #define SYSCFG_IRQ               71
 static const int usart_irq[] = { 37, 38, 39, 52, 53, 71, 82, 83 };
-static const int timer_irq[] = { 28, 29, 30, 50 };
+static const int timer_irq[] = { -1, 28, 29, 30, 50, 54, 55, -1, 24, 25, 26,
+                                 43, 44, 45 };
 #define ADC_IRQ 18
 static const int spi_irq[] =   { 35, 36, 51, 0, 0, 0 };
+static const int i2c_irq[] =   { 31, 33, 72 };
 static const int exti_irq[] =  { 6, 7, 8, 9, 10, 23, 23, 23, 23, 23, 40,
                                  40, 40, 40, 40, 40} ;
 
@@ -119,6 +124,10 @@ static void gd32f470xx_soc_initfn(Object *obj)
 
     for (i = 0; i < GD32F470XX_NUM_SPIS; i++) {
         object_initialize_child(obj, "spi[*]", &s->spi[i], TYPE_STM32F2XX_SPI);
+    }
+
+    for (i = 0; i < GD32F470XX_NUM_I2CS; i++) {
+        object_initialize_child(obj, "i2c[*]", &s->i2c[i], TYPE_GD32F470XX_I2C);
     }
 
     object_initialize_child(obj, "exti", &s->exti, TYPE_STM32F4XX_EXTI);
@@ -297,7 +306,7 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
         sysbus_connect_irq(busdev, 0, qdev_get_gpio_in(armv7m, usart_irq[i]));
     }
 
-    /* Timer 2 to 5 */
+    /* TODO: Implement TIMER0 / 7 */
     for (i = 0; i < GD32F470XX_NUM_TIMERS; i++) {
         dev = DEVICE(&(s->timer[i]));
         qdev_prop_set_uint64(dev, "clock-frequency", 1000000000);
@@ -306,7 +315,9 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
         }
         busdev = SYS_BUS_DEVICE(dev);
         sysbus_mmio_map(busdev, 0, timer_addr[i]);
-        sysbus_connect_irq(busdev, 0, qdev_get_gpio_in(armv7m, timer_irq[i]));
+        if (timer_irq[i] > 0) {
+            sysbus_connect_irq(busdev, 0, qdev_get_gpio_in(armv7m, timer_irq[i]));
+        }
     }
 
     /* ADC device, the IRQs are ORed together */
@@ -345,6 +356,18 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
         sysbus_connect_irq(busdev, 0, qdev_get_gpio_in(armv7m, spi_irq[i]));
     }
 
+    /* I2C devices */
+    for (i = 0; i < GD32F470XX_NUM_I2CS; i++) {
+        dev = DEVICE(&(s->i2c[i]));
+        if (!sysbus_realize(SYS_BUS_DEVICE(&s->i2c[i]), errp)) {
+            return;
+        }
+        busdev = SYS_BUS_DEVICE(dev);
+        sysbus_mmio_map(busdev, 0, i2c_addr[i]);
+        qdev_connect_gpio_out(dev, 0, qdev_get_gpio_in(armv7m, i2c_irq[i])); // I2Cx_EV_IRQ
+        qdev_connect_gpio_out(dev, 1, qdev_get_gpio_in(armv7m, i2c_irq[i] + 1)); // I2Cx_ER_IRQ
+    }
+
     /* EXTI device */
     dev = DEVICE(&s->exti);
     if (!sysbus_realize(SYS_BUS_DEVICE(&s->exti), errp)) {
@@ -367,36 +390,23 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
     busdev = SYS_BUS_DEVICE(dev);
     sysbus_mmio_map(busdev, 0, USB_OTG_FS_ADD);
 
-    create_unimplemented_device("timer[7]",    0x40001400, 0x400);
-    create_unimplemented_device("timer[12]",   0x40001800, 0x400);
-    create_unimplemented_device("timer[6]",    0x40001000, 0x400);
-    create_unimplemented_device("timer[13]",   0x40001C00, 0x400);
-    create_unimplemented_device("timer[14]",   0x40002000, 0x400);
-    create_unimplemented_device("RTC and BKP", 0x40002800, 0x400);
-    create_unimplemented_device("WWDG",        0x40002C00, 0x400);
-    create_unimplemented_device("IWDG",        0x40003000, 0x400);
-    create_unimplemented_device("I2S2ext",     0x40003000, 0x400);
-    create_unimplemented_device("I2S3ext",     0x40004000, 0x400);
-    create_unimplemented_device("I2C1",        0x40005400, 0x400);
-    create_unimplemented_device("I2C2",        0x40005800, 0x400);
-    create_unimplemented_device("I2C3",        0x40005C00, 0x400);
-    create_unimplemented_device("CAN1",        0x40006400, 0x400);
-    create_unimplemented_device("CAN2",        0x40006800, 0x400);
+    create_unimplemented_device("RTC",         0x40002800, 0x400);
+    create_unimplemented_device("WWDGT",       0x40002C00, 0x400);
+    create_unimplemented_device("FWDGT",       0x40003000, 0x400);
+    create_unimplemented_device("I2S1_add",    0x40003400, 0x400);
+    create_unimplemented_device("I2S2_add",    0x40004000, 0x400);
+    create_unimplemented_device("CAN0",        0x40006400, 0x400);
+    create_unimplemented_device("CAN1",        0x40006800, 0x400);
     create_unimplemented_device("DAC",         0x40007400, 0x400);
-    create_unimplemented_device("timer[1]",    0x40010000, 0x400);
-    create_unimplemented_device("timer[8]",    0x40010400, 0x400);
     create_unimplemented_device("SDIO",        0x40012C00, 0x400);
-    create_unimplemented_device("timer[9]",    0x40014000, 0x400);
-    create_unimplemented_device("timer[10]",   0x40014400, 0x400);
-    create_unimplemented_device("timer[11]",   0x40014800, 0x400);
-    create_unimplemented_device("Flash Int",   0x40023C00, 0x400);
+    create_unimplemented_device("FMC",         0x40023C00, 0x400);
     create_unimplemented_device("BKPSRAM",     0x40024000, 0x400);
-    create_unimplemented_device("DMA1",        0x40026000, 0x400);
-    create_unimplemented_device("DMA2",        0x40026400, 0x400);
-    create_unimplemented_device("Ethernet",    0x40028000, 0x1400);
-    create_unimplemented_device("USB OTG HS",  0x40040000, 0x30000);
-    create_unimplemented_device("DCMI",        0x50050000, 0x400);
-    create_unimplemented_device("FSMC",        0xA0000000, 0x1000);
+    create_unimplemented_device("DMA0",        0x40026000, 0x400);
+    create_unimplemented_device("DMA1",        0x40026400, 0x400);
+    create_unimplemented_device("ENET",        0x40028000, 0x1400);
+    create_unimplemented_device("USBHS",       0x40040000, 0x30000);
+    create_unimplemented_device("DCI",         0x50050000, 0x400);
+    create_unimplemented_device("EXMCSWREG",   0xA0000000, 0x1000);
     create_unimplemented_device("DES",         0x1FFF7A10, 0x200); // Device Electronic Signature
 }
 

@@ -28,6 +28,7 @@
 
 #include "hw/gpio/gd32f470xx_gpio.h"
 #include "hw/misc/gd32f470xx_rcu.h"
+#include "hw/i2c/gd32f470xx_i2c.h"
 #include "hw/misc/stm32f2xx_pwr.h"
 #include "hw/misc/stm32f2xx_crc.h"
 #include "hw/misc/stm32f2xx_rng.h"
@@ -55,9 +56,10 @@ OBJECT_DECLARE_SIMPLE_TYPE(GD32F470XXState, GD32F470XX_SOC)
 
 #define GD32F470XX_NUM_GPIOS 9
 #define GD32F470XX_NUM_USARTS 7
-#define GD32F470XX_NUM_TIMERS 4
+#define GD32F470XX_NUM_TIMERS 14
 #define GD32F470XX_NUM_ADCS 6
 #define GD32F470XX_NUM_SPIS 6
+#define GD32F470XX_NUM_I2CS 3
 
 #define GD32F470XX_FLASH_BASE_ADDRESS 0x08000000
 #define GD32F470XX_SRAM_BASE_ADDRESS 0x20000000
@@ -85,6 +87,7 @@ struct GD32F470XXState {
     OrIRQState adc_irqs;
     STM32F2XXADCState adc[GD32F470XX_NUM_ADCS];
     STM32F2XXSPIState spi[GD32F470XX_NUM_SPIS];
+    GD32F470XXI2CState i2c[GD32F470XX_NUM_I2CS];
     STM32F2XXUsbOtgFsState usb_otg_fs;
 
     MemoryRegion sram;

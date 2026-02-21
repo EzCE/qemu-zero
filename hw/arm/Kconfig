@@ -296,6 +296,7 @@ config ZGC4
     select GD32F470XX_SOC
     select ST7789V
     select GPIO_KEYPAD
+    select GASGAUGE_I2C
 
 config ZYNQ
     bool
@@ -422,6 +423,7 @@ config GD32F470XX_SOC
     select STM32F2XX_USART
     select STM32F2XX_ADC
     select STM32F2XX_SPI
+    select GD32F470XX_I2C
 
 config STM32F405_SOC
     bool
