@@ -27,7 +27,7 @@
 #define HW_ARM_GD32F470XX_SOC_H
 
 #include "hw/gpio/gd32f470xx_gpio.h"
-#include "hw/misc/stm32f2xx_rcc.h"
+#include "hw/misc/gd32f470xx_rcu.h"
 #include "hw/misc/stm32f2xx_pwr.h"
 #include "hw/misc/stm32f2xx_crc.h"
 #include "hw/misc/stm32f2xx_rng.h"
@@ -74,7 +74,7 @@ struct GD32F470XXState {
     ARMv7MState armv7m;
 
     GD32F470xxGpioState gpio[GD32F470XX_NUM_GPIOS];
-    STM32F2XXRccState rcc;
+    GD32F470XXRcuState rcu;
     STM32F2XXPwrState pwr;
     STM32F2XXCrcState crc;
     STM32F2XXRngState rng;

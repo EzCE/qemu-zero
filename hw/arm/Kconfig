@@ -410,7 +410,7 @@ config GD32F470XX_SOC
     bool
     select ARM_V7M
     select OR_IRQ
-    select STM32F2XX_RCC
+    select GD32F470XX_RCU
     select STM32F2XX_CRC
     select STM32F2XX_PWR
     select STM32F2XX_RNG

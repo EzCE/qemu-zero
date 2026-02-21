@@ -107,7 +107,7 @@ config FSL_IMX8MP_CCM
 config STM32_RCC
     bool
 
-config STM32F2XX_RCC
+config GD32F470XX_RCU
     bool
 
 config STM32F2XX_CRC

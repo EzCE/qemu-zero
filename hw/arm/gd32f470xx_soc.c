@@ -31,7 +31,7 @@
 #include "hw/core/qdev-clock.h"
 #include "hw/misc/unimp.h"
 
-#define RCC_ADD                        0x40023800
+#define RCU_ADD                        0x40023800
 #define CRC_ADD                        0x40023000
 #define RNG_ADD                        0x50060800
 #define SYSCFG_ADD                     0x40013800
@@ -88,7 +88,7 @@ static void gd32f470xx_soc_initfn(Object *obj)
 
     object_initialize_child(obj, "armv7m", &s->armv7m, TYPE_ARMV7M);
 
-    object_initialize_child(obj, "rcc", &s->rcc, TYPE_STM32F2XX_RCC);
+    object_initialize_child(obj, "rcu", &s->rcu, TYPE_GD32F470XX_RCU);
 
     object_initialize_child(obj, "pwr", &s->pwr, TYPE_STM32F2XX_PWR);
 
@@ -229,14 +229,14 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
     }
 
     /* Reset and clock controller */
-    dev = DEVICE(&s->rcc);
-    if (!sysbus_realize(SYS_BUS_DEVICE(&s->rcc), errp)) {
+    dev = DEVICE(&s->rcu);
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->rcu), errp)) {
         return;
     }
-    s->rcc.refclk = s->refclk;
+    s->rcu.refclk = s->refclk;
 
     busdev = SYS_BUS_DEVICE(dev);
-    sysbus_mmio_map(busdev, 0, RCC_ADD);
+    sysbus_mmio_map(busdev, 0, RCU_ADD);
 
     /* PMU */
     dev = DEVICE(&s->pwr);

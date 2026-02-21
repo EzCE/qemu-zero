@@ -1,6 +1,7 @@
 /*
- * STM32F2xx RCC
+ * GD32F470xx RCU
  *
+ * Copyright (c) 2026 TIny_Hacker
  * Copyright (c) 2022 Jean-Baptiste Boric <jblbeurope@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,28 +23,24 @@
  * THE SOFTWARE.
  */
 
-#ifndef HW_STM_RCC_H
-#define HW_STM_RCC_H
+#ifndef HW_GD32F470_RCU_H
+#define HW_GD32F470_RCU_H
 
 #include "hw/core/sysbus.h"
 #include "qom/object.h"
 
-#define RCC_CR      0x00
-#define RCC_CFGR    0x08
+#define TYPE_GD32F470XX_RCU "gd32f470xx-rcu"
+OBJECT_DECLARE_SIMPLE_TYPE(GD32F470XXRcuState, GD32F470XX_RCU)
 
-#define TYPE_STM32F2XX_RCC "stm32f2xx-rcc"
-OBJECT_DECLARE_SIMPLE_TYPE(STM32F2XXRccState, STM32F2XX_RCC)
-
-struct STM32F2XXRccState {
+struct GD32F470XXRcuState {
     /* <private> */
     SysBusDevice parent_obj;
 
     /* <public> */
     MemoryRegion mmio;
 
-    uint32_t rcc_cr;
-    uint32_t rcc_cfgr;
-    
+    uint32_t rcu_reg[32];
+
     Clock * refclk;
 };
 

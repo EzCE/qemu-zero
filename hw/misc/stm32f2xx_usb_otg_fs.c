@@ -65,10 +65,26 @@ static void stm32f2xx_usb_otg_fs_write(void *opaque, hwaddr addr,
 
     switch (addr) {
     case OTG_FS_GRSTCTL:
-        value &= 0x000007F7;
-        /* Simulate core soft reset. */
-        value &= ~(1u << 0);
-        s->grstctl = value;
+        // TX FIFO flush
+        if (value & (1 << 10)) {
+            s->grstctl |= (1 << 10);
+            s->grstctl &= ~(1 << 10);
+        }
+
+        // RX FIFO flush
+        if (value & (1 << 4)) {
+            s->grstctl |= (1 << 4);
+            s->grstctl &= ~(1 << 4);
+        }
+
+        // Core soft reset
+        if (value & 1) {
+            s->grstctl |= 1;
+            s->grstctl &= ~1;
+        }
+
+        // Other writes
+        s->grstctl |= (value & ~(0x000007F7));
         break;
     default:
         qemu_log_mask(LOG_UNIMP,
