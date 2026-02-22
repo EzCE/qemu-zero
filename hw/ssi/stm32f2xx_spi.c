@@ -27,18 +27,9 @@
 #include "qemu/module.h"
 #include "hw/ssi/stm32f2xx_spi.h"
 #include "migration/vmstate.h"
+#include "trace.h"
 
-#ifndef STM_SPI_ERR_DEBUG
-#define STM_SPI_ERR_DEBUG 1
-#endif
 
-#define DB_PRINT_L(lvl, fmt, args...) do { \
-    if (STM_SPI_ERR_DEBUG >= lvl) { \
-        qemu_log("%s: " fmt, __func__, ## args); \
-    } \
-} while (0)
-
-#define DB_PRINT(fmt, args...) DB_PRINT_L(1, fmt, ## args)
 
 static void stm32f2xx_spi_reset(DeviceState *dev)
 {
@@ -57,12 +48,12 @@ static void stm32f2xx_spi_reset(DeviceState *dev)
 
 static void stm32f2xx_spi_transfer(STM32F2XXSPIState *s)
 {
-    DB_PRINT("Data to send: 0x%x\n", s->spi_dr);
+    trace_stm32f2xx_spi_send(s->spi_dr);
 
     s->spi_dr = ssi_transfer(s->ssi, s->spi_dr);
     s->spi_sr |= STM_SPI_SR_RXNE;
 
-    DB_PRINT("Data received: 0x%x\n", s->spi_dr);
+    trace_stm32f2xx_spi_receive(s->spi_dr);
 }
 
 static uint64_t stm32f2xx_spi_read(void *opaque, hwaddr addr,
@@ -70,7 +61,7 @@ static uint64_t stm32f2xx_spi_read(void *opaque, hwaddr addr,
 {
     STM32F2XXSPIState *s = opaque;
 
-    DB_PRINT("Address: 0x%" HWADDR_PRIx "\n", addr);
+    trace_stm32f2xx_spi_read(addr);
 
     switch (addr) {
     case STM_SPI_CR1:
@@ -118,7 +109,7 @@ static void stm32f2xx_spi_write(void *opaque, hwaddr addr,
     STM32F2XXSPIState *s = opaque;
     uint32_t value = val64;
 
-    DB_PRINT("Address: 0x%" HWADDR_PRIx ", Value: 0x%x\n", addr, value);
+    trace_stm32f2xx_spi_write(addr, value);
 
     switch (addr) {
     case STM_SPI_CR1:

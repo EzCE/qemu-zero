@@ -63,3 +63,10 @@ allwinner_a10_spi_tx(uint8_t byte) "write 0x%02x"
 allwinner_a10_spi_rx(uint8_t byte) "read 0x%02x"
 allwinner_a10_spi_read(const char* regname, uint32_t value) "reg[%s] => 0x%08x"
 allwinner_a10_spi_write(const char* regname, uint32_t value) "reg[%s] <= 0x%08x"
+
+# stm32f2xx_spi.c
+
+stm32f2xx_spi_send(uint32_t data) "Data to send: 0x%x"
+stm32f2xx_spi_receive(uint32_t data) "Data received: 0x%x"
+stm32f2xx_spi_read(uint64_t addr) "Address: 0x%" PRIx64
+stm32f2xx_spi_write(uint64_t addr, uint32_t value) "Address: 0x%" PRIx64 ", Value: 0x%x"
