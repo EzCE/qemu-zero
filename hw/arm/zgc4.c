@@ -43,6 +43,7 @@
 #define SYSCLK_FRQ 240000000ULL
 
 #define ST7789V_ADD 0x60000000
+#define ST7789V_DATA_ADD 0x2
 
 static const GpioKeypadKey keys[] = {
     { 0, 0, Q_KEY_CODE_F1 }, // Key::y=
@@ -140,7 +141,8 @@ static void zgc4_init(MachineState *machine)
     object_unref(OBJECT(flash));
 
     dev = qdev_new(TYPE_ST7789V);
-    qdev_prop_set_bit(dev, "rotate-right", true);
+    qdev_prop_set_uint32(dev, "data-address", ST7789V_DATA_ADD);
+    qdev_prop_set_bit(dev, "rotate-left", true);
     sysbus_mmio_map(SYS_BUS_DEVICE(dev), 0, ST7789V_ADD);
     sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &error_fatal);
 

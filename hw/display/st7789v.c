@@ -156,11 +156,21 @@ static void st7789v_update(void *opaque)
                 console[y * stride + x] = *vram++;
             }
         }
+    } else if (s->rotate_left) {
+        int stride = surface_width(surface);
+        uint32_t *console = surface_data(surface);
+        uint32_t *vram = s->vram;
+
+        for (int x = 0; x < s->height; x++) {
+            for (int y = s->width - 1; y >= 0; y--) {
+                console[y * stride + x] = *vram++;
+            }
+        }
     } else {
         memcpy(surface_data(surface), s->vram, s->width * s->height * 4);
     }
 
-    if (s->rotate_right) {
+    if (s->rotate_right || s->rotate_left) {
         dpy_gfx_update(s->con, 0, 0, s->height, s->width);
     } else {
         dpy_gfx_update(s->con, 0, 0, s->width, s->height);
@@ -189,7 +199,7 @@ static void st7789v_realize(DeviceState *dev, Error **errp)
     sysbus_init_mmio(SYS_BUS_DEVICE(dev), &s->mmio);
 
     s->con = graphic_console_init(dev, 0, &st7789v_ops, s);
-    if (s->rotate_right) {
+    if (s->rotate_right || s->rotate_left) {
         qemu_console_resize(s->con, s->height, s->width);
     } else {
         qemu_console_resize(s->con, s->width, s->height);
@@ -203,11 +213,9 @@ static uint64_t st7789v_read(void *opaque, hwaddr addr, unsigned int size)
     ST7789VState *s = opaque;
     uint64_t value = 0;
 
-    switch (addr) {
-    case ST7789V_COMMAND:
+    if (addr == s->cmd_add) {
         value = 0;
-        break;
-    case ST7789V_DATA:
+    } else if (addr == s->data_add) {
         switch (s->state) {
         case ST7789V_STATE_READ_DISPLAY_ID_1:
             s->state = ST7789V_STATE_READ_DISPLAY_ID_2;
@@ -310,12 +318,10 @@ static uint64_t st7789v_read(void *opaque, hwaddr addr, unsigned int size)
             value = 0;
             break;
         }
-        break;
-    default:
+    } else {
         qemu_log_mask(LOG_UNIMP,
                       "%s: Unimplemented st7789v read 0x%"HWADDR_PRIx"\n",
                       __func__, addr);
-        break;
     }
 
     trace_st7789v_read(s, addr, size, value);
@@ -332,8 +338,7 @@ static void st7789v_write(void *opaque, hwaddr addr, uint64_t val64,
 
     trace_st7789v_write(s, addr, size, val64);
 
-    switch (addr) {
-    case ST7789V_COMMAND:
+    if (addr == s->cmd_add) {
         switch (value) {
         case ST7789V_NOP:
             break;
@@ -428,8 +433,7 @@ static void st7789v_write(void *opaque, hwaddr addr, uint64_t val64,
                         "%s: Unimplemented st7789v command 0x%x\n", __func__,
                         value);
         }
-        break;
-    case ST7789V_DATA:
+    } else if (addr == s->data_add) {
         switch (s->state) {
         case ST7789V_STATE_WRITE_GAMMA_SET:
             s->state = ST7789V_STATE_RESET;
@@ -521,12 +525,10 @@ static void st7789v_write(void *opaque, hwaddr addr, uint64_t val64,
         default:
             break;
         }
-        break;
-    default:
+    } else {
         qemu_log_mask(LOG_UNIMP,
                       "%s: Unimplemented st7789v write 0x%"HWADDR_PRIx"\n",
                       __func__, addr);
-        break;
     }
 }
 
@@ -540,7 +542,10 @@ static const Property st7789v_properties[] = {
     DEFINE_PROP_UINT32("display-id", ST7789VState, display_id, 0x858552),
     DEFINE_PROP_UINT32("width", ST7789VState, width, 240),
     DEFINE_PROP_UINT32("height", ST7789VState, height, 320),
+    DEFINE_PROP_UINT32("cmd-address", ST7789VState, cmd_add, ST7789V_COMMAND),
+    DEFINE_PROP_UINT32("data-address", ST7789VState, data_add, ST7789V_DATA),
     DEFINE_PROP_BOOL("rotate-right", ST7789VState, rotate_right, false),
+    DEFINE_PROP_BOOL("rotate-left", ST7789VState, rotate_left, false),
 };
 
 static void st7789v_init(Object *obj)

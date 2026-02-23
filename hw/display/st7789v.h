@@ -89,7 +89,10 @@ struct ST7789VState {
     uint32_t display_id;
     uint32_t width;
     uint32_t height;
+    uint32_t cmd_add;
+    uint32_t data_add;
     bool rotate_right;
+    bool rotate_left;
 
     MemoryRegion mmio;
     MemoryRegion framebuffer;
