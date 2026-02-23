@@ -69,8 +69,9 @@ gd32f470xx_i2c_write(void *dev, unsigned int addr, unsigned int size, uint64_t v
 gd32f470xx_i2c_irq_event(void *dev, uint32_t reg_stat0, bool raise_irq) "i2c: %p reg_stat0: 0x%04x raise_irq: %d"
 gd32f470xx_i2c_irq_error(void *dev, uint32_t reg_stat0, bool raise_irq) "i2c: %p reg_stat0: 0x%04x raise_irq: %d"
 
-# gasgauge_i2c.c
+# stc3100.c
 
-gasgauge_i2c_event(uint8_t event) "event: 0x%02x"
-gasgauge_i2c_recv(uint8_t data) "data: 0x%02x"
-gasgauge_i2c_send(uint8_t data) "data: 0x%02x" 
+stc3100_event(uint8_t event) "Event 0x%02x"
+stc3100_select_reg(uint8_t reg) "Selected reg 0x%02x"
+stc3100_recv(uint8_t data, uint8_t reg) "Sent data 0x%02x to master from reg 0x%02x"
+stc3100_send(uint8_t data, uint8_t reg) "Received data 0x%02x from master to reg 0x%02x" 

@@ -128,6 +128,13 @@ static uint64_t gd32f470xx_i2c_read(void *opaque, hwaddr addr,
         value = s->i2c_reg[I2C_DATA];
         s->i2c_reg[I2C_DATA] = 0;
         s->i2c_reg[I2C_STAT0] &= ~I2C_STAT0_RBNE;
+        if (s->read_mode && GD_I2C_FIELD(s->i2c_reg[I2C_CTL0], I2C_CTL0_ACKEN)) {
+            int byte = i2c_recv(s->bus); // Receive next byte ahead if ACKEN
+            if (byte >= 0) {
+                s->i2c_reg[I2C_DATA] = byte;
+                s->i2c_reg[I2C_STAT0] |= I2C_STAT0_RBNE;
+            }
+        }
         s->last_read = I2C_DATA;
         break;
     case I2C_STAT0_ADD:
@@ -138,6 +145,13 @@ static uint64_t gd32f470xx_i2c_read(void *opaque, hwaddr addr,
         value = s->i2c_reg[I2C_STAT1];
         if (s->last_read == I2C_STAT0) {
             s->i2c_reg[I2C_STAT0] &= ~I2C_STAT0_ADDSEND;
+            if (s->read_mode) {
+                int byte = i2c_recv(s->bus);
+                if (byte >= 0) {
+                    s->i2c_reg[I2C_DATA] = byte;
+                    s->i2c_reg[I2C_STAT0] |= I2C_STAT0_RBNE;
+                }
+            }
         }
         s->last_read = I2C_STAT1;
         break;
@@ -207,6 +221,7 @@ static void gd32f470xx_i2c_write(void *opaque, hwaddr addr,
         s->last_wrote = I2C_CTL0;
         break;
     case I2C_DATA_ADD:
+        s->i2c_reg[I2C_DATA] = value;
         if ((s->i2c_reg[I2C_STAT0] & I2C_STAT0_SBSEND) && s->address == 0xFF) {
             if (i2c_start_transfer(s->bus, value >> 1, value & 1)) {
                 qemu_log_mask(LOG_GUEST_ERROR,
@@ -214,11 +229,18 @@ static void gd32f470xx_i2c_write(void *opaque, hwaddr addr,
                               __func__, value >> 1);
             } else {
                 s->address = GD_I2C_FIELD(s->i2c_reg[I2C_DATA], I2C_DATA_TRB);
+                s->read_mode = value & 1;
                 s->i2c_reg[I2C_STAT0] &= ~I2C_STAT0_SBSEND;
                 s->i2c_reg[I2C_STAT0] |= I2C_STAT0_ADDSEND;
             }
         } else {
-            s->i2c_reg[I2C_STAT0] |= I2C_STAT0_BTC;
+            if (i2c_send(s->bus, GD_I2C_FIELD(s->i2c_reg[I2C_DATA], I2C_DATA_TRB))) {
+                qemu_log_mask(LOG_GUEST_ERROR,
+                              "%s: I2C send failed\n", __func__);
+            } else {
+                s->i2c_reg[I2C_STAT0] |= I2C_STAT0_BTC;
+                s->i2c_reg[I2C_STAT0] |= I2C_STAT0_TBE;
+            }
         }
         s->i2c_reg[I2C_DATA] = 0;
         s->i2c_reg[I2C_STAT0] |= I2C_STAT0_TBE;

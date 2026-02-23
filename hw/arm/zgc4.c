@@ -33,7 +33,7 @@
 #include "hw/arm/boot.h"
 #include "hw/display/st7789v.h"
 #include "hw/input/gpio-keypad.h"
-#include "hw/i2c/gasgauge_i2c.h"
+#include "hw/i2c/stc3100.h"
 #include "hw/arm/zgc4.h"
 #include "system/block-backend.h"
 #include "system/address-spaces.h"
@@ -185,7 +185,7 @@ static void zgc4_init(MachineState *machine)
     }
     object_unref(OBJECT(gpio));
 
-    dev = qdev_new(TYPE_GASGAUGE_I2C);
+    dev = qdev_new(TYPE_STC3100);
     qdev_prop_set_uint8(dev, "address", 0x70);
     qdev_realize_and_unref(dev, BUS(s->i2c[0].bus), &error_fatal);
 

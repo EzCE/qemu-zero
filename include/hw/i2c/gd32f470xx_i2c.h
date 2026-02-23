@@ -202,6 +202,7 @@ struct GD32F470XXI2CState {
     qemu_irq irq[2];
 
     uint8_t address;
+    uint8_t read_mode;
 
     uint32_t i2c_reg[11];
     int8_t last_read;

@@ -296,7 +296,7 @@ config ZGC4
     select GD32F470XX_SOC
     select ST7789V
     select GPIO_KEYPAD
-    select GASGAUGE_I2C
+    select STC3100
 
 config ZYNQ
     bool
