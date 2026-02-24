@@ -1306,7 +1306,7 @@ int vhost_virtqueue_start(struct vhost_dev *dev,
 
     if (vhost_needs_vring_endian(vdev)) {
         r = vhost_virtqueue_set_vring_endian_legacy(dev,
-                                                    virtio_is_big_endian(vdev),
+                                                    virtio_vdev_is_big_endian(vdev),
                                                     vhost_vq_index);
         if (r) {
             return r;
@@ -1423,7 +1423,7 @@ static int do_vhost_virtqueue_stop(struct vhost_dev *dev,
      */
     if (vhost_needs_vring_endian(vdev)) {
         vhost_virtqueue_set_vring_endian_legacy(dev,
-                                                !virtio_is_big_endian(vdev),
+                                                !virtio_vdev_is_big_endian(vdev),
                                                 vhost_vq_index);
     }
 
@@ -1926,8 +1926,8 @@ static bool vhost_inflight_buffer_pre_load(void *opaque, Error **errp)
     void *addr = qemu_memfd_alloc("vhost-inflight", inflight->size,
                                   F_SEAL_GROW | F_SEAL_SHRINK | F_SEAL_SEAL,
                                   &fd, errp);
-    if (*errp) {
-        return -ENOMEM;
+    if (!addr) {
+        return false;
     }
 
     inflight->offset = 0;

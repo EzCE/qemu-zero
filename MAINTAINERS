@@ -350,6 +350,7 @@ F: common-user/host/riscv*
 F: tests/functional/riscv32
 F: tests/functional/riscv64
 F: tests/tcg/riscv64/
+F: tests/qtest/iommu-riscv-test.c
 
 RISC-V XThead* extensions
 M: Christoph Muellner <christoph.muellner@vrull.eu>
@@ -2405,6 +2406,7 @@ F: subprojects/libvhost-user/
 F: block/export/vhost-user*
 F: util/vhost-user-server.c
 F: net/vhost*
+F: tests/functional/x86_64/test_vhost_user_bridge.py
 
 vhost-shadow-virtqueue
 R: Eugenio Pérez <eperezma@redhat.com>
@@ -2600,7 +2602,7 @@ F: include/hw/virtio/virtio-mem.h
 
 virtio-snd
 M: Gerd Hoffmann <kraxel@redhat.com>
-R: Manos Pitsidianakis <manos.pitsidianakis@linaro.org>
+M: Manos Pitsidianakis <manos.pitsidianakis@linaro.org>
 S: Supported
 F: hw/audio/virtio-snd.c
 F: hw/audio/virtio-snd-pci.c
@@ -3034,6 +3036,7 @@ X: audio/sndioaudio.c
 X: audio/spiceaudio.c
 F: include/qemu/audio*.h
 F: qapi/audio.json
+F: tests/audio/
 
 ALSA Audio backend
 M: Gerd Hoffmann <kraxel@redhat.com>
@@ -3600,6 +3603,7 @@ M: Tao Tang <tangtao1634@phytium.com.cn>
 S: Maintained
 F: tests/qtest/libqos/qos-iommu*
 F: tests/qtest/libqos/qos-smmuv3*
+F: tests/qtest/libqos/qos-riscv-iommu*
 
 Device Fuzzing
 M: Alexander Bulekov <alxndr@bu.edu>
