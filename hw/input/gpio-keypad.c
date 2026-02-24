@@ -84,6 +84,8 @@ static void gpio_keypad_set_output(GpioKeypadState *s)
 
         qemu_set_irq(s->output[column], active);
     }
+
+    qemu_set_irq(s->output[GPIO_KEYPAD_NR_PINS], 1);
 }
 
 static void gpio_keypad_set_input(void *opaque, int n, int level)
@@ -130,6 +132,7 @@ static void gpio_keypad_keyboard_event(DeviceState *dev, QemuConsole *src,
 
     if (need_set_output && s->input) {
         gpio_keypad_set_output(s);
+        qemu_set_irq(s->output[GPIO_KEYPAD_NR_PINS], 0);
     }
 }
 
@@ -262,7 +265,7 @@ static void gpio_keypad_initfn(Object *obj)
     GpioKeypadState *s = GPIO_KEYPAD(obj);
 
     qdev_init_gpio_in(DEVICE(obj), gpio_keypad_set_input, GPIO_KEYPAD_NR_PINS);
-    qdev_init_gpio_out(DEVICE(obj), s->output, GPIO_KEYPAD_NR_PINS);
+    qdev_init_gpio_out(DEVICE(obj), s->output, GPIO_KEYPAD_NR_PINS + 1);
 }
 
 static void gpio_keypad_class_init(ObjectClass *oc, const void *data)

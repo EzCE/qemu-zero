@@ -35,6 +35,7 @@
 #include "hw/input/gpio-keypad.h"
 #include "hw/i2c/stc3100.h"
 #include "hw/arm/zgc4.h"
+#include "hw/gpio/zgcx_id_gpio.h"
 #include "system/block-backend.h"
 #include "system/address-spaces.h"
 #include "hw/arm/machines-qom.h"
@@ -45,64 +46,130 @@
 #define ST7789V_ADD 0x60000000
 #define ST7789V_DATA_ADD 0x2
 
-static const GpioKeypadKey keys[] = {
+#define ZGC4_HW_VERSION 0x1
+
+static const GpioKeypadKey keys_zgc4[] = {
     { 0, 0, Q_KEY_CODE_F1 }, // Key::y=
-    { 0, 1, Q_KEY_CODE_F2 }, // Key::window
-    { 0, 2, Q_KEY_CODE_F3 }, // Key::zoom
-    { 0, 3, Q_KEY_CODE_F4 }, // Key::trace
-    { 0, 4, Q_KEY_CODE_F5 }, // Key::graph
+    { 1, 0, Q_KEY_CODE_F2 }, // Key::window
+    { 2, 0, Q_KEY_CODE_F3 }, // Key::zoom
+    { 3, 0, Q_KEY_CODE_F4 }, // Key::trace
+    { 4, 0, Q_KEY_CODE_F5 }, // Key::graph
 
-    { 1, 0, Q_KEY_CODE_ESC }, // Key::mode
+    { 0, 1, Q_KEY_CODE_ESC }, // Key::mode
     { 1, 1, Q_KEY_CODE_LEFT }, // Key::left
-    { 1, 2, Q_KEY_CODE_UP }, // Key::up
-    { 1, 3, Q_KEY_CODE_RIGHT }, // Key::right
+    { 2, 1, Q_KEY_CODE_UP }, // Key::up
+    { 3, 1, Q_KEY_CODE_RIGHT }, // Key::right
+    { 4, 1, Q_KEY_CODE_SHIFT }, { 4, 1, Q_KEY_CODE_SHIFT_R }, // Key::2nd
 
-    { 2, 0, Q_KEY_CODE_EQUAL }, // Key::x,t,theta,n
-    { 2, 1, Q_KEY_CODE_END }, // Key::stat
+    { 0, 2, Q_KEY_CODE_EQUAL }, // Key::x,t,theta,n
+    { 1, 2, Q_KEY_CODE_END }, // Key::stat
     { 2, 2, Q_KEY_CODE_DOWN }, // Key::down
-    { 2, 3, Q_KEY_CODE_DELETE }, // Key::del
-    { 2, 4, Q_KEY_CODE_SLASH }, // Key::clear
+    { 3, 2, Q_KEY_CODE_DELETE }, // Key::del
+    { 4, 2, Q_KEY_CODE_SLASH }, // Key::clear
 
-    { 3, 0, Q_KEY_CODE_A }, // Key::math
-    { 3, 1, Q_KEY_CODE_B }, // Key::apps
-    { 3, 2, Q_KEY_CODE_C }, // Key::prgm
+    { 0, 3, Q_KEY_CODE_A }, // Key::math
+    { 1, 3, Q_KEY_CODE_B }, // Key::apps
+    { 2, 3, Q_KEY_CODE_C }, // Key::prgm
     { 3, 3, Q_KEY_CODE_INSERT }, // Key::vars
-    { 3, 4, Q_KEY_CODE_CTRL }, // Key::alpha
+    { 4, 3, Q_KEY_CODE_CTRL }, { 4, 3, Q_KEY_CODE_CTRL_R }, // Key::alpha
 
-    { 4, 0, Q_KEY_CODE_D }, // Key::x^-1
-    { 4, 1, Q_KEY_CODE_E }, // Key::sin
-    { 4, 2, Q_KEY_CODE_F }, // Key::cos
-    { 4, 3, Q_KEY_CODE_G }, // Key::tan
+    { 0, 4, Q_KEY_CODE_D }, // Key::x^-1
+    { 1, 4, Q_KEY_CODE_E }, // Key::sin
+    { 2, 4, Q_KEY_CODE_F }, // Key::cos
+    { 3, 4, Q_KEY_CODE_G }, // Key::tan
     { 4, 4, Q_KEY_CODE_H }, // Key::^
 
-    { 5, 0, Q_KEY_CODE_I }, // Key::x^2
-    { 5, 1, Q_KEY_CODE_J }, // Key::,
-    { 5, 2, Q_KEY_CODE_K }, // Key::(
-    { 5, 3, Q_KEY_CODE_L }, // Key::)
-    { 5, 4, Q_KEY_CODE_M }, { 5, 4, Q_KEY_CODE_KP_DIVIDE }, // Key::/
+    { 0, 5, Q_KEY_CODE_I }, // Key::x^2
+    { 1, 5, Q_KEY_CODE_J }, // Key::,
+    { 2, 5, Q_KEY_CODE_K }, // Key::(
+    { 3, 5, Q_KEY_CODE_L }, // Key::)
+    { 4, 5, Q_KEY_CODE_M }, { 4, 5, Q_KEY_CODE_KP_DIVIDE }, // Key::/
 
-    { 6, 0, Q_KEY_CODE_N }, // Key::log
-    { 6, 1, Q_KEY_CODE_O }, { 6, 1, Q_KEY_CODE_KP_7 }, // Key::7
-    { 6, 2, Q_KEY_CODE_P }, { 6, 2, Q_KEY_CODE_KP_8 }, // Key::8
-    { 6, 3, Q_KEY_CODE_Q }, { 6, 3, Q_KEY_CODE_KP_9 }, // Key::9
-    { 6, 4, Q_KEY_CODE_R }, { 6, 4, Q_KEY_CODE_KP_MULTIPLY }, // Key::*
+    { 0, 6, Q_KEY_CODE_N }, // Key::log
+    { 1, 6, Q_KEY_CODE_O }, { 1, 6, Q_KEY_CODE_7 }, // Key::7
+    { 2, 6, Q_KEY_CODE_P }, { 2, 6, Q_KEY_CODE_8 }, // Key::8
+    { 3, 6, Q_KEY_CODE_Q }, { 3, 6, Q_KEY_CODE_9 }, // Key::9
+    { 4, 6, Q_KEY_CODE_R }, { 4, 6, Q_KEY_CODE_KP_MULTIPLY }, // Key::*
 
-    { 7, 0, Q_KEY_CODE_S }, // Key::ln
-    { 7, 1, Q_KEY_CODE_T }, { 7, 1, Q_KEY_CODE_KP_4 }, // Key::4
-    { 7, 2, Q_KEY_CODE_U }, { 7, 2, Q_KEY_CODE_KP_5 }, // Key::5
-    { 7, 3, Q_KEY_CODE_V }, { 7, 3, Q_KEY_CODE_KP_6 }, // Key::6
-    { 7, 4, Q_KEY_CODE_W }, { 7, 4, Q_KEY_CODE_KP_SUBTRACT }, // Key::-
+    { 0, 7, Q_KEY_CODE_S }, // Key::ln
+    { 1, 7, Q_KEY_CODE_T }, { 1, 7, Q_KEY_CODE_4 }, // Key::4
+    { 2, 7, Q_KEY_CODE_U }, { 2, 7, Q_KEY_CODE_5 }, // Key::5
+    { 3, 7, Q_KEY_CODE_V }, { 3, 7, Q_KEY_CODE_6 }, // Key::6
+    { 4, 7, Q_KEY_CODE_W }, { 4, 7, Q_KEY_CODE_KP_SUBTRACT }, // Key::-
 
-    { 8, 0, Q_KEY_CODE_X }, // Key::sto->
-    { 8, 1, Q_KEY_CODE_Y }, { 8, 1, Q_KEY_CODE_1 }, // Key::1
-    { 8, 2, Q_KEY_CODE_Z }, { 8, 2, Q_KEY_CODE_2 }, // Key::2
-    { 8, 3, Q_KEY_CODE_3 }, // Key::3
-    { 8, 4, Q_KEY_CODE_KP_ADD }, // Key::+
+    { 0, 8, Q_KEY_CODE_X }, // Key::sto->
+    { 1, 8, Q_KEY_CODE_Y }, { 1, 8, Q_KEY_CODE_1 }, // Key::1
+    { 2, 8, Q_KEY_CODE_Z }, { 2, 8, Q_KEY_CODE_2 }, // Key::2
+    { 3, 8, Q_KEY_CODE_3 }, // Key::3
+    { 4, 8, Q_KEY_CODE_KP_ADD }, // Key::+
 
-    { 8, 1, Q_KEY_CODE_SPC }, { 8, 1, Q_KEY_CODE_0 }, // Key::0
-    { 8, 2, Q_KEY_CODE_KP_DECIMAL }, // Key::.
-    { 8, 3, Q_KEY_CODE_ALT }, // Key::(-)
-    { 8, 4, Q_KEY_CODE_KP_ENTER }, // Key::enter
+    { 1, 9, Q_KEY_CODE_SPC }, { 1, 9, Q_KEY_CODE_0 }, // Key::0
+    { 2, 9, Q_KEY_CODE_DOT }, // Key::.
+    { 3, 9, Q_KEY_CODE_MINUS }, // Key::(-)
+    { 4, 9, Q_KEY_CODE_RET }, // Key::enter
+
+    { 0, 0, Q_KEY_CODE_UNMAPPED },
+};
+
+static const GpioKeypadKey keys_zgc3[] = {
+    { 0, 0, Q_KEY_CODE_F1 }, // Key::y=
+    { 1, 0, Q_KEY_CODE_F2 }, // Key::window
+    { 2, 0, Q_KEY_CODE_F3 }, // Key::zoom
+    { 3, 0, Q_KEY_CODE_F4 }, // Key::trace
+    { 4, 0, Q_KEY_CODE_F5 }, // Key::graph
+
+    { 0, 1, Q_KEY_CODE_SHIFT }, { 0, 1, Q_KEY_CODE_SHIFT_R }, // Key::2nd
+    { 1, 1, Q_KEY_CODE_LEFT }, // Key::left
+    { 2, 1, Q_KEY_CODE_UP }, // Key::up
+    { 3, 1, Q_KEY_CODE_RIGHT }, // Key::right
+    { 4, 1, Q_KEY_CODE_DELETE }, // Key::del
+
+    { 0, 2, Q_KEY_CODE_CTRL }, { 0, 2, Q_KEY_CODE_CTRL_R }, // Key::alpha
+    { 1, 2, Q_KEY_CODE_EQUAL }, // Key::x,t,theta,n
+    { 2, 2, Q_KEY_CODE_DOWN }, // Key::down
+    { 3, 2, Q_KEY_CODE_ESC }, // Key::mode
+    { 4, 2, Q_KEY_CODE_SLASH }, // Key::clear
+
+    { 0, 3, Q_KEY_CODE_A }, // Key::math
+    { 1, 3, Q_KEY_CODE_B }, // Key::apps
+    { 2, 3, Q_KEY_CODE_C }, // Key::prgm
+    { 3, 3, Q_KEY_CODE_INSERT }, // Key::vars
+    { 4, 3, Q_KEY_CODE_END },  // Key::stat
+
+    { 0, 4, Q_KEY_CODE_D }, // Key::x^-1
+    { 1, 4, Q_KEY_CODE_E }, // Key::sin
+    { 2, 4, Q_KEY_CODE_F }, // Key::cos
+    { 3, 4, Q_KEY_CODE_G }, // Key::tan
+    { 4, 4, Q_KEY_CODE_H }, // Key::^
+
+    { 0, 5, Q_KEY_CODE_I }, // Key::x^2
+    { 1, 5, Q_KEY_CODE_J }, // Key::,
+    { 2, 5, Q_KEY_CODE_K }, // Key::(
+    { 3, 5, Q_KEY_CODE_L }, // Key::)
+    { 4, 5, Q_KEY_CODE_M }, { 4, 5, Q_KEY_CODE_KP_DIVIDE }, // Key::/
+
+    { 0, 6, Q_KEY_CODE_N }, // Key::log
+    { 1, 6, Q_KEY_CODE_O }, { 1, 6, Q_KEY_CODE_7 }, // Key::7
+    { 2, 6, Q_KEY_CODE_P }, { 2, 6, Q_KEY_CODE_8 }, // Key::8
+    { 3, 6, Q_KEY_CODE_Q }, { 3, 6, Q_KEY_CODE_9 }, // Key::9
+    { 4, 6, Q_KEY_CODE_R }, { 4, 6, Q_KEY_CODE_KP_MULTIPLY }, // Key::*
+
+    { 0, 7, Q_KEY_CODE_S }, // Key::ln
+    { 1, 7, Q_KEY_CODE_T }, { 1, 7, Q_KEY_CODE_4 }, // Key::4
+    { 2, 7, Q_KEY_CODE_U }, { 2, 7, Q_KEY_CODE_5 }, // Key::5
+    { 3, 7, Q_KEY_CODE_V }, { 3, 7, Q_KEY_CODE_6 }, // Key::6
+    { 4, 7, Q_KEY_CODE_W }, { 4, 7, Q_KEY_CODE_KP_SUBTRACT }, // Key::-
+
+    { 0, 8, Q_KEY_CODE_X }, // Key::sto->
+    { 1, 8, Q_KEY_CODE_Y }, { 1, 8, Q_KEY_CODE_1 }, // Key::1
+    { 2, 8, Q_KEY_CODE_Z }, { 2, 8, Q_KEY_CODE_2 }, // Key::2
+    { 3, 8, Q_KEY_CODE_3 }, // Key::3
+    { 4, 8, Q_KEY_CODE_KP_ADD }, // Key::+
+
+    { 1, 9, Q_KEY_CODE_SPC }, { 1, 9, Q_KEY_CODE_0 }, // Key::0
+    { 2, 9, Q_KEY_CODE_DOT }, // Key::.
+    { 3, 9, Q_KEY_CODE_MINUS }, // Key::(-)
+    { 4, 9, Q_KEY_CODE_RET }, // Key::enter
 
     { 0, 0, Q_KEY_CODE_UNMAPPED },
 };
@@ -110,8 +177,6 @@ static const GpioKeypadKey keys[] = {
 static void zgc4_init(MachineState *machine)
 {
     DeviceState *soc;
-    DeviceState *flash;
-    DeviceState *gpio;
     DeviceState *dev;
     DriveInfo *dinfo;
     Clock *sysclk;
@@ -128,17 +193,17 @@ static void zgc4_init(MachineState *machine)
     s = GD32F470XX_SOC(soc);
 
     dinfo = drive_get(IF_MTD, 0, 0);
-    flash = qdev_new("w25q64");
+    dev = qdev_new("w25q64");
     if (dinfo) {
-        qdev_prop_set_drive(flash, "drive",
+        qdev_prop_set_drive(dev, "drive",
                             blk_by_legacy_dinfo(dinfo));
     }
-    qdev_realize(flash, BUS(s->spi[5].ssi), &error_fatal);
-    qemu_irq cs_line = qdev_get_gpio_in_named(flash, SSI_GPIO_CS, 0);
+    qdev_realize(dev, BUS(s->spi[5].ssi), &error_fatal);
+    qemu_irq cs_line = qdev_get_gpio_in_named(dev, SSI_GPIO_CS, 0);
     qdev_connect_gpio_out(DEVICE(&s->gpio[1]),
                           5,
                           cs_line);
-    object_unref(OBJECT(flash));
+    object_unref(OBJECT(dev));
 
     dev = qdev_new(TYPE_ST7789V);
     qdev_prop_set_uint32(dev, "data-address", ST7789V_DATA_ADD);
@@ -146,46 +211,61 @@ static void zgc4_init(MachineState *machine)
     sysbus_mmio_map(SYS_BUS_DEVICE(dev), 0, ST7789V_ADD);
     sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &error_fatal);
 
-    gpio = qdev_new(TYPE_GPIO_KEYPAD);
-    qdev_prop_set_bit(gpio, "active-low", false);
-    qdev_prop_set_uint32(gpio, "num-columns", 10);
-    qdev_prop_set_uint32(gpio, "num-rows", 5);
-    gpio_keypad_set_keys(gpio, keys);
-    sysbus_realize(SYS_BUS_DEVICE(gpio), &error_fatal);
+    dev = qdev_new(TYPE_GPIO_KEYPAD);
+    qdev_prop_set_bit(dev, "active-low", false);
+    qdev_prop_set_uint32(dev, "num-columns", 5);
+    qdev_prop_set_uint32(dev, "num-rows", 10);
+    if (ZGC4_HW_VERSION == 0x1) {
+        gpio_keypad_set_keys(dev, keys_zgc4);
+    } else {
+        gpio_keypad_set_keys(dev, keys_zgc3);
+    }
+    sysbus_realize(SYS_BUS_DEVICE(dev), &error_fatal);
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-a-out", 4,
-                                qdev_get_gpio_in(gpio, 0));
+                                qdev_get_gpio_in(dev, 0));
 
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-a-out", 5,
-                                qdev_get_gpio_in(gpio, 1));
+                                qdev_get_gpio_in(dev, 1));
 
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-d-out", 2,
-                                qdev_get_gpio_in(gpio, 2));
+                                qdev_get_gpio_in(dev, 2));
 
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-d-out", 3,
-                                qdev_get_gpio_in(gpio, 3));
+                                qdev_get_gpio_in(dev, 3));
 
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-b-out", 14,
-                                qdev_get_gpio_in(gpio, 4));
+                                qdev_get_gpio_in(dev, 4));
 
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-b-out", 15,
-                                qdev_get_gpio_in(gpio, 5));
-   
+                                qdev_get_gpio_in(dev, 5));
+
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-d-out", 6,
-                                qdev_get_gpio_in(gpio, 6));
+                                qdev_get_gpio_in(dev, 6));
 
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-c-out", 7,
-                                qdev_get_gpio_in(gpio, 7));
+                                qdev_get_gpio_in(dev, 7));
 
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-c-out", 8,
-                                qdev_get_gpio_in(gpio, 8));
+                                qdev_get_gpio_in(dev, 8));
 
     qdev_connect_gpio_out_named(DEVICE(soc), "gpio-c-out", 9,
-                                qdev_get_gpio_in(gpio, 9));
+                                qdev_get_gpio_in(dev, 9));
     for (int i = 0; i < 5; i++) {
-        qdev_connect_gpio_out(DEVICE(gpio), i,
+        qdev_connect_gpio_out(DEVICE(dev), i,
                               qdev_get_gpio_in_named(soc, "gpio-b", i));
     }
-    object_unref(OBJECT(gpio));
+    qdev_connect_gpio_out(DEVICE(dev), 32,
+                          qdev_get_gpio_in_named(soc, "gpio-a", 15));
+    object_unref(OBJECT(dev));
+
+    dev = qdev_new(TYPE_ZGCX_ID_GPIO);
+    qdev_prop_set_uint8(dev, "hw-version", ZGC4_HW_VERSION);
+    sysbus_realize(SYS_BUS_DEVICE(dev), &error_fatal);
+    for (int i = 0; i < 3; i++) {
+        qdev_connect_gpio_out(DEVICE(dev), i,
+                              qdev_get_gpio_in_named(soc, "gpio-b" , 10 + i));
+    }
+    object_unref(OBJECT(dev));
 
     dev = qdev_new(TYPE_STC3100);
     qdev_prop_set_uint8(dev, "address", 0x70);

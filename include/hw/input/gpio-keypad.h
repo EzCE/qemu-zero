@@ -39,7 +39,7 @@ typedef struct GpioKeypadState {
     uint32_t input;
     bool keypad_status[GPIO_KEYPAD_NR_PINS][GPIO_KEYPAD_NR_PINS];
 
-    qemu_irq output[GPIO_KEYPAD_NR_PINS];
+    qemu_irq output[GPIO_KEYPAD_NR_PINS + 1]; // Last is latch
 } GpioKeypadState;
 
 void gpio_keypad_set_keys(DeviceState *dev, const GpioKeypadKey *keys);

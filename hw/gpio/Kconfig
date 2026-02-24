@@ -33,3 +33,6 @@ config ZAURUS_SCOOP
 
 config GD32F470XX_GPIO
     bool
+
+config ZGCX_ID_GPIO
+    bool
