@@ -1,4 +1,24 @@
 ===========
+ZGC4 README
+===========
+
+This is a fork of QEMU which aims to support emulation of the Zero ZGC4
+graphing calculator. Currently, most official firmware versions behave as
+expected, with the exception of features relying on RTC / USB emulation.
+
+To use the emulator, you'll need a dump of your calculator's main internal
+flash, along with an 8MB external flash file which can either be empty
+(and then formatted by the firmware when using the emulator) or dumped
+from a physical device.
+
+To run the emulator:
+``./qemu-system-arm -M zgc4 --kernel path/to/internal-flash.bin
+-drive file=path/to/external-flash.bin,if=mtd,format=raw``
+
+For more info, see `the project's topic on Cemetech
+<https://www.cemetech.net/forum/viewtopic.php?t=20939>`__.
+
+===========
 QEMU README
 ===========
 
