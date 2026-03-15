@@ -15,6 +15,9 @@ To run the emulator:
 ``./qemu-system-arm -M zgc4 --kernel path/to/internal-flash.bin
 -drive file=path/to/external-flash.bin,if=mtd,format=raw``
 
+When working with the emulator, you may find these scripts useful:
+https://github.com/TIny-Hacker/zgc4-flash-tools
+
 For more info, see `the project's topic on Cemetech
 <https://www.cemetech.net/forum/viewtopic.php?t=20939>`__.
 
