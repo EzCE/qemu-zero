@@ -183,7 +183,7 @@ static void gd32f470xx_soc_realize(DeviceState *dev_soc, Error **errp)
     clock_set_mul_div(s->refclk, 8, 1);
     clock_set_source(s->refclk, s->sysclk);
 
-    memory_region_init_rom(&s->flash, OBJECT(dev_soc), "GD32F470XX.flash",
+    memory_region_init_ram(&s->flash, OBJECT(dev_soc), "GD32F470XX.flash",
                            soc_variant->flash_size, &err);
     if (err != NULL) {
         error_propagate(errp, err);
